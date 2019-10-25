@@ -9,6 +9,8 @@ def clone_repo(source: str, dest: str, all_branches: bool = True, **kwargs):
     if all_branches:
         track_all_remote_branches(repo)
 
+    return repo
+
 
 def _clone_repo(source, dest, **kwargs) -> Repo:
     return Repo.clone_from(source, dest, **kwargs)
