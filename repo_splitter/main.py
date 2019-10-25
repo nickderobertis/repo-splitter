@@ -90,7 +90,8 @@ def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files:
           'then you can go to your original local repo and run git push --all --force to reverse it')
 
 
-
+def main():
+    return fire.Fire(split_repo)
 
 if __name__ == '__main__':
-    fire.Fire(split_repo)
+    main()
