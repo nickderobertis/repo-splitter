@@ -12,6 +12,9 @@ sphinx-autodoc-typehints = "*"
 sphinxcontrib-fulltoc = "*"
 sphinx-paramlinks = "*"
 twine = "*"
+fire = "*"
+gitpython = "*"
+jupyterlab = "*"
 
 [requires]
 python_version = "3.7"
