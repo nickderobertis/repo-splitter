@@ -2,26 +2,24 @@
 # Sphinx configuration is in the docsrc folder
 
 # Main package name
-PACKAGE_NAME = 'py_qs_example'
+PACKAGE_NAME = 'repo_splitter'
 
 # Package version in the format (major, minor, release)
-PACKAGE_VERSION_TUPLE = (0, 1, 9)
+PACKAGE_VERSION_TUPLE = (0, 1, 0)
 
 # Short description of the package
-PACKAGE_SHORT_DESCRIPTION = 'Python package PyPi Sphinx quickstart example app'
+PACKAGE_SHORT_DESCRIPTION = 'A CLI tool to split a part of a git repo into another git repo, separating the history'
 
 # Long description of the package
 PACKAGE_DESCRIPTION = """
-This is the example application for a quick start repo which was created by using pypi-sphinx-quickstart.
-Fork the repo at https://github.com/whoopnip/pypi-sphinx-quickstart and edit the conf.py files to bootstrap
-a Python project with PyPi deployment and Sphinx auto documentation already set up.
+A CLI tool to split a part of a git repo into another git repo, separating the history
 """
 
 # Author
 PACKAGE_AUTHOR = "Nick DeRobertis"
 
 # Author email
-PACKAGE_AUTHOR_EMAIL = 'mail@example.com'
+PACKAGE_AUTHOR_EMAIL = 'whoopnip@gmail.com'
 
 # Name of license for package
 PACKAGE_LICENSE = 'MIT'
@@ -49,6 +47,8 @@ PACKAGE_INSTALL_REQUIRES = [
     # e.g.
     # 'package',
     # 'otherpackage>=1,<2'
+    'fire',
+    'gitpython'
 ]
 
 # Sphinx executes all the import statements as it generates the documentation. To avoid having to install all
@@ -69,6 +69,6 @@ CONSOLE_SCRIPTS = [],
 SCRIPTS = []
 
 PACKAGE_URLS = {
-    'Code': 'https://github.com/whoopnip/pypi-sphinx-quickstart/',
-    'Documentation': 'https://whoopnip.github.io/pypi-sphinx-quickstart/'
+    'Code': 'https://github.com/whoopnip/repo-splitter/',
+    'Documentation': 'https://whoopnip.github.io/repo-splitter/'
 }
