@@ -17,5 +17,9 @@ def push_tags(repo: Repo) -> str:
     return repo.git.push('origin', '--tags')
 
 
+def push_all_force(repo: Repo) -> str:
+    return repo.git.push('origin', '--all', '--force')
+
+
 def _push_branch(repo: Repo, branch_name: str) -> str:
     return repo.git.push('-u', 'origin', branch_name)
