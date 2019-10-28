@@ -5,7 +5,7 @@
 PACKAGE_NAME = 'repo_splitter'
 
 # Package version in the format (major, minor, release)
-PACKAGE_VERSION_TUPLE = (0, 1, 0)
+PACKAGE_VERSION_TUPLE = (0, 2, 0)
 
 # Short description of the package
 PACKAGE_SHORT_DESCRIPTION = 'A CLI tool to split a part of a git repo into another git repo, separating the history'

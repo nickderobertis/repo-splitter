@@ -186,7 +186,11 @@ def restore_from_backup(repo_source: str, repo_dest: str, github_token: str, bac
 
 
 def main():
-    return fire.Fire(split_repo)
+    return fire.Fire({
+        'split': split_repo,
+        'rmhist': remove_from_repo_history,
+        'restore': restore_from_backup,
+    })
 
 
 if __name__ == '__main__':
