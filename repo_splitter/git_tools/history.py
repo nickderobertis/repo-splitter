@@ -20,18 +20,22 @@ def remove_history_for_files_matching(repo: Repo, file_patterns: Sequence[str]):
     _remove_history_except_for_files(repo, unmatched_files)
 
 
-def _remove_history_except_for_files(repo: Repo, files: Sequence[str]):
+def _remove_history_except_for_files(repo: Repo, files: Sequence[str]) -> str:
     starts_with_wanted_files = ['^' + file for file in files]
     wanted_files_str = '|'.join(starts_with_wanted_files)
+    # Need to check if any files come back from ls-files not in wanted files. If empty, this means that the only
+    # remaining files are the desired files, which means that nothing should be done.
     index_filter_cmd = f"""
     ALL_FILES=$(git ls-files | grep -vE "{wanted_files_str}");
-    printf "$ALL_FILES" | xargs --delimiter="\\n" git rm -rf --cached --ignore-unmatch
+    if [ -n "$ALL_FILES" ]; then 
+        printf "$ALL_FILES" | xargs --delimiter="\\n" git rm -rf --cached --ignore-unmatch; 
+    fi
     """.strip()
 
-    index_filter_branch(repo, index_filter_cmd)
+    return index_filter_branch(repo, index_filter_cmd)
 
 
-def index_filter_branch(repo: Repo, index_filter_cmd: str):
+def index_filter_branch(repo: Repo, index_filter_cmd: str) -> str:
     # Add debug info
     index_filter_cmd = f"""
     set -x;
@@ -42,7 +46,7 @@ def index_filter_branch(repo: Repo, index_filter_cmd: str):
     echo "End of output for commit: $GIT_COMMIT \n\n\n";
     (exit $EXIT_CODE);
     """
-    _filter_branch(repo, '--prune-empty', '--index-filter', index_filter_cmd, '--', '--all')
+    return _filter_branch(repo, '--prune-empty', '--index-filter', index_filter_cmd, '--', '--all')
 
 
 def _filter_branch(repo: Repo, *args, **kwargs):
