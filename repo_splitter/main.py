@@ -127,7 +127,7 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
 
     print(f'Cleaning up what was split off in the old repo')
     with tempfile.TemporaryDirectory() as repo_temp_dest:
-        print(f'Cloning {repo_source} into temporary directory')
+        print(f'Cloning {repo_source} into temporary directory {repo_temp_dest}')
         repo = clone_repo(repo_source, repo_temp_dest, all_branches=True)
         if is_remote_url(repo_source):
             # If remote, need to add authentication into the remote
@@ -173,16 +173,16 @@ def restore_from_backup(repo_source: str, repo_dest: str, github_token: str, bac
         raise ValueError(f'No backup found at {backup_dir}')
 
     repo = Repo(backup_dir)
-    if is_remote_url(repo_source):
-        # If remote, need to add authentication into the remote
-        github_repo = github_repo_from_clone_url(repo_source, github_token)
-        delete_remote(repo)
-        connect_local_repo_to_github_repo(repo, github_repo, github_token)
-        push_all_force(repo)
+    if not is_remote_url(repo_source):
+        print(f'Not a remote url, did not do anything. Local backup is in {backup_dir}')
+        return
 
-    shutil.rmtree(repo_dest)
-    os.makedirs(repo_dest)
-    shutil.copytree(backup_dir, repo_dest)
+    # If remote, need to add authentication into the remote
+    github_repo = github_repo_from_clone_url(repo_source, github_token)
+    delete_remote(repo)
+    connect_local_repo_to_github_repo(repo, github_repo, github_token)
+    push_all_force(repo)
+
 
 
 def main():
