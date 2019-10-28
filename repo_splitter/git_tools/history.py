@@ -23,7 +23,10 @@ def remove_history_for_files_matching(repo: Repo, file_patterns: Sequence[str]):
 def _remove_history_except_for_files(repo: Repo, files: Sequence[str]):
     starts_with_wanted_files = ['^' + file for file in files]
     wanted_files_str = '|'.join(starts_with_wanted_files)
-    index_filter_cmd = f'git ls-files | grep -vE "{wanted_files_str}" | xargs git rm -rf --cached --ignore-unmatch'
+    index_filter_cmd = f"""
+    ALL_FILES=$(git ls-files | grep -vE "{wanted_files_str}");
+    printf "$ALL_FILES" | xargs --delimiter="\\n" git rm -rf --cached --ignore-unmatch
+    """.strip()
 
     index_filter_branch(repo, index_filter_cmd)
 
