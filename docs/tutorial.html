@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Getting started with repo_splitter &#8212; repo_splitter 0.2.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="repo_splitter" href="api/modules.html" />
+    <link rel="prev" title="Welcome to Repo Splitter documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started-with-repo-splitter">
+<span id="tutorial"></span><h1>Getting started with repo_splitter<a class="headerlink" href="#getting-started-with-repo-splitter" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>Install via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">repo_splitter</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>For an overview of the CLI commands, do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<div class="section" id="split-repo">
+<h3>Split Repo<a class="headerlink" href="#split-repo" title="Permalink to this headline">¶</a></h3>
+<p>This is the main functionality of the package, to split a repo into two repos. For
+details of how to use the CLI, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">split</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>A typical usage would be as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">split</span> \
+    <span class="s1">&#39;https://github.com/myuser/my-repo.git&#39;</span> \
+    <span class="n">my_out_dir</span> <span class="n">new</span><span class="o">-</span><span class="n">repo</span><span class="o">-</span><span class="n">name</span> \
+    <span class="s1">&#39;[&quot;files/to/remove&quot;, &quot;relative/paths/**/with/globs&quot;]&#39;</span> \
+    <span class="mi">09</span><span class="n">fgdfg5540d65sa565565d45694</span>
+</pre></div>
+</div>
+<p>For details on usage from Python, see <a class="reference internal" href="api/repo_splitter.html#repo_splitter.main.split_repo" title="repo_splitter.main.split_repo"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_repo()</span></code></a>.</p>
+</div>
+<div class="section" id="remove-history-from-repo">
+<h3>Remove History from Repo<a class="headerlink" href="#remove-history-from-repo" title="Permalink to this headline">¶</a></h3>
+<p>This could be used in cases where you just want to remove some files from the full
+history of a repo. Or it may be used after running the split command without
+cleaning up the existing repo history. For details of how to use the CLI, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">rmhist</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>A typical usage would be as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">rmhist</span> \
+    <span class="s1">&#39;https://github.com/myuser/my-repo.git&#39;</span> \
+    <span class="s1">&#39;[&quot;files/to/remove&quot;, &quot;relative/paths/**/with/globs&quot;]&#39;</span> \
+    <span class="mi">09</span><span class="n">fgdfg5540d65sa565565d45694</span>
+</pre></div>
+</div>
+<p>For details on usage from Python, see <a class="reference internal" href="api/repo_splitter.html#repo_splitter.main.remove_from_repo_history" title="repo_splitter.main.remove_from_repo_history"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_from_repo_history()</span></code></a>.</p>
+</div>
+<div class="section" id="restore-from-backup">
+<h3>Restore from Backup<a class="headerlink" href="#restore-from-backup" title="Permalink to this headline">¶</a></h3>
+<p>A backup is automatically created when removing existing repo history. Use the
+restore command after either splitting the repo or removing history
+to revert to the original history from the backup. For details of how to
+use the CLI, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">restore</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>A typical usage would be as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">restore</span> \
+    <span class="s1">&#39;https://github.com/myuser/my-repo.git&#39;</span> \
+    <span class="n">my_out_dir</span> \
+    <span class="mi">09</span><span class="n">fgdfg5540d65sa565565d45694</span>
+</pre></div>
+</div>
+<p>For details on usage from Python, see <a class="reference internal" href="api/repo_splitter.html#repo_splitter.main.restore_from_backup" title="repo_splitter.main.restore_from_backup"><code class="xref py py-func docutils literal notranslate"><span class="pre">restore_from_backup()</span></code></a>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started with repo_splitter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#split-repo">Split Repo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-history-from-repo">Remove History from Repo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#restore-from-backup">Restore from Backup</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">repo_splitter</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Repo Splitter documentation!</a></li>
+      <li>Next: <a href="api/modules.html" title="next chapter">repo_splitter</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick DeRobertis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

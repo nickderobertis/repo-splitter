@@ -1,0 +1,7 @@
+repo_splitter
+=============
+
+.. toctree::
+   :maxdepth: 4
+
+   repo_splitter

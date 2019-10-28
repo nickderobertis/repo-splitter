@@ -1,0 +1,38 @@
+repo\_splitter.github\_tools package
+====================================
+
+Submodules
+----------
+
+repo\_splitter.github\_tools.connect module
+-------------------------------------------
+
+.. automodule:: repo_splitter.github_tools.connect
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.github\_tools.create module
+------------------------------------------
+
+.. automodule:: repo_splitter.github_tools.create
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.github\_tools.query module
+-----------------------------------------
+
+.. automodule:: repo_splitter.github_tools.query
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: repo_splitter.github_tools
+   :members:
+   :undoc-members:
+   :show-inheritance:

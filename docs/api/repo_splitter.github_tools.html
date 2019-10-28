@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>repo_splitter.github_tools package &#8212; repo_splitter 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="repo_splitter.git_tools.files package" href="repo_splitter.git_tools.files.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="repo-splitter-github-tools-package">
+<h1>repo_splitter.github_tools package<a class="headerlink" href="#repo-splitter-github-tools-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-repo_splitter.github_tools.connect">
+<span id="repo-splitter-github-tools-connect-module"></span><h2>repo_splitter.github_tools.connect module<a class="headerlink" href="#module-repo_splitter.github_tools.connect" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="repo_splitter.github_tools.connect.connect_local_repo_to_github_repo">
+<code class="sig-prename descclassname">repo_splitter.github_tools.connect.</code><code class="sig-name descname">connect_local_repo_to_github_repo</code><span class="sig-paren">(</span><em class="sig-param">local_repo</em>, <em class="sig-param">github_repo</em>, <em class="sig-param">token</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/github_tools/connect.html#connect_local_repo_to_github_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.github_tools.connect.connect_local_repo_to_github_repo" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Remote</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-repo_splitter.github_tools.create">
+<span id="repo-splitter-github-tools-create-module"></span><h2>repo_splitter.github_tools.create module<a class="headerlink" href="#module-repo_splitter.github_tools.create" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="repo_splitter.github_tools.create.create_repo">
+<code class="sig-prename descclassname">repo_splitter.github_tools.create.</code><code class="sig-name descname">create_repo</code><span class="sig-paren">(</span><em class="sig-param">token</em>, <em class="sig-param">repo_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/github_tools/create.html#create_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.github_tools.create.create_repo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-repo_splitter.github_tools.query">
+<span id="repo-splitter-github-tools-query-module"></span><h2>repo_splitter.github_tools.query module<a class="headerlink" href="#module-repo_splitter.github_tools.query" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="repo_splitter.github_tools.query.NoSuchGithubRepositoryException">
+<em class="property">exception </em><code class="sig-prename descclassname">repo_splitter.github_tools.query.</code><code class="sig-name descname">NoSuchGithubRepositoryException</code><a class="reference internal" href="../_modules/repo_splitter/github_tools/query.html#NoSuchGithubRepositoryException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.github_tools.query.NoSuchGithubRepositoryException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="repo_splitter.github_tools.query.github_repo_from_clone_url">
+<code class="sig-prename descclassname">repo_splitter.github_tools.query.</code><code class="sig-name descname">github_repo_from_clone_url</code><span class="sig-paren">(</span><em class="sig-param">clone_url</em>, <em class="sig-param">token</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/github_tools/query.html#github_repo_from_clone_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.github_tools.query.github_repo_from_clone_url" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Repository</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-repo_splitter.github_tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-repo_splitter.github_tools" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Getting started with repo_splitter</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">repo_splitter</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="repo_splitter.html">repo_splitter package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="repo_splitter.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.html">repo_splitter.git_tools package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">repo_splitter.github_tools package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#module-repo_splitter.github_tools.connect">repo_splitter.github_tools.connect module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#module-repo_splitter.github_tools.create">repo_splitter.github_tools.create module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#module-repo_splitter.github_tools.query">repo_splitter.github_tools.query module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#module-repo_splitter.github_tools">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="repo_splitter.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="repo_splitter.html#module-repo_splitter.main">repo_splitter.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="repo_splitter.html#module-repo_splitter">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">repo_splitter</a><ul>
+  <li><a href="repo_splitter.html">repo_splitter package</a><ul>
+      <li>Previous: <a href="repo_splitter.git_tools.files.html" title="previous chapter">repo_splitter.git_tools.files package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick DeRobertis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/repo_splitter.github_tools.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

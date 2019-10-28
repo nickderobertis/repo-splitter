@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>repo_splitter.git_tools.history &#8212; repo_splitter 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for repo_splitter.git_tools.history</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Sequence</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">git</span> <span class="k">import</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">GitCommandError</span>
+
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.unwanted</span> <span class="k">import</span> <span class="n">get_unwanted_files_from_repo</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.wanted</span> <span class="k">import</span> <span class="n">get_desired_files_from_patterns</span>
+
+
+<span class="n">START_COMMIT_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;Start of output for commit: [\d\w]+&quot;</span>
+
+
+<div class="viewcode-block" id="remove_history_for_files_not_matching"><a class="viewcode-back" href="../../../api/repo_splitter.git_tools.html#repo_splitter.git_tools.history.remove_history_for_files_not_matching">[docs]</a><span class="k">def</span> <span class="nf">remove_history_for_files_not_matching</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="n">wanted_files</span> <span class="o">=</span> <span class="n">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">)</span>
+    <span class="n">_remove_history_except_for_files</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">wanted_files</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="remove_history_for_files_matching"><a class="viewcode-back" href="../../../api/repo_splitter.git_tools.html#repo_splitter.git_tools.history.remove_history_for_files_matching">[docs]</a><span class="k">def</span> <span class="nf">remove_history_for_files_matching</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="n">unmatched_files</span> <span class="o">=</span> <span class="n">get_unwanted_files_from_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">)</span>
+    <span class="n">_remove_history_except_for_files</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">unmatched_files</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_remove_history_except_for_files</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">starts_with_wanted_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;^&#39;</span> <span class="o">+</span> <span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+    <span class="n">wanted_files_str</span> <span class="o">=</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">starts_with_wanted_files</span><span class="p">)</span>
+    <span class="c1"># Need to check if any files come back from ls-files not in wanted files. If empty, this means that the only</span>
+    <span class="c1"># remaining files are the desired files, which means that nothing should be done.</span>
+    <span class="n">index_filter_cmd</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    ALL_FILES=$(git ls-files | grep -vE &quot;</span><span class="si">{wanted_files_str}</span><span class="s2">&quot;);</span>
+<span class="s2">    if [ -n &quot;$ALL_FILES&quot; ]; then </span>
+<span class="s2">        printf &quot;$ALL_FILES&quot; | xargs --delimiter=&quot;</span><span class="se">\\</span><span class="s2">n&quot; git rm -rf --cached --ignore-unmatch; </span>
+<span class="s2">    fi</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">index_filter_branch</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">index_filter_cmd</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="index_filter_branch"><a class="viewcode-back" href="../../../api/repo_splitter.git_tools.html#repo_splitter.git_tools.history.index_filter_branch">[docs]</a><span class="k">def</span> <span class="nf">index_filter_branch</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">index_filter_cmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="c1"># Add debug info</span>
+    <span class="n">index_filter_cmd</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    set -x;</span>
+<span class="s2">    echo &quot;</span><span class="se">\n\n\n</span><span class="s2">Start of output for commit: $GIT_COMMIT&quot;;</span>
+<span class="s2">    echo $(printenv);</span>
+<span class="s2">    </span><span class="si">{index_filter_cmd}</span><span class="s2">;</span>
+<span class="s2">    EXIT_CODE=$?;</span>
+<span class="s2">    echo &quot;End of output for commit: $GIT_COMMIT </span><span class="se">\n\n\n</span><span class="s2">&quot;;</span>
+<span class="s2">    (exit $EXIT_CODE);</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_filter_branch</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="s1">&#39;--prune-empty&#39;</span><span class="p">,</span> <span class="s1">&#39;--index-filter&#39;</span><span class="p">,</span> <span class="n">index_filter_cmd</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="s1">&#39;--all&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_filter_branch</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">filter_branch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+    <span class="k">except</span> <span class="n">GitCommandError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="n">GitFilterBranchException</span><span class="o">.</span><span class="n">from_git_command_error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">exc</span> <span class="kn">from</span> <span class="nn">None</span>
+
+
+<div class="viewcode-block" id="GitFilterBranchException"><a class="viewcode-back" href="../../../api/repo_splitter.git_tools.html#repo_splitter.git_tools.history.GitFilterBranchException">[docs]</a><span class="k">class</span> <span class="nc">GitFilterBranchException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GitFilterBranchException.__init__"><a class="viewcode-back" href="../../../api/repo_splitter.git_tools.html#repo_splitter.git_tools.history.GitFilterBranchException.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stderr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span></div>
+
+<div class="viewcode-block" id="GitFilterBranchException.from_git_command_error"><a class="viewcode-back" href="../../../api/repo_splitter.git_tools.html#repo_splitter.git_tools.history.GitFilterBranchException.from_git_command_error">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_git_command_error</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">git_error</span><span class="p">:</span> <span class="n">GitCommandError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">git_error</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="n">git_error</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+            <span class="n">git_error</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_extract_from_last_commit</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">last_commit_start</span> <span class="o">=</span> <span class="p">[</span><span class="n">match</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">START_COMMIT_PATTERN</span><span class="p">,</span> <span class="n">output</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="p">[</span><span class="n">last_commit_start</span><span class="p">:]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stdout</span> <span class="o">=</span> <span class="n">GitFilterBranchException</span><span class="o">.</span><span class="n">_extract_from_last_commit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+            <span class="n">stderr</span> <span class="o">=</span> <span class="n">GitFilterBranchException</span><span class="o">.</span><span class="n">_extract_from_last_commit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">stdout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span>
+            <span class="n">stderr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        Stdout:</span>
+<span class="s2">        </span><span class="si">{stdout}</span><span class="s2"></span>
+
+<span class="s2">        Stderr:</span>
+<span class="s2">        </span><span class="si">{stderr}</span><span class="s2"></span>
+
+<span class="s2">        Note: Full stdout and stderr available in exception exc.stdout and exc.stderr</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">message</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Getting started with repo_splitter</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">repo_splitter</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick DeRobertis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

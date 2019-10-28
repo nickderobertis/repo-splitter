@@ -1,0 +1,38 @@
+repo\_splitter.git\_tools.files package
+=======================================
+
+Submodules
+----------
+
+repo\_splitter.git\_tools.files.all module
+------------------------------------------
+
+.. automodule:: repo_splitter.git_tools.files.all
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.files.unwanted module
+-----------------------------------------------
+
+.. automodule:: repo_splitter.git_tools.files.unwanted
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.files.wanted module
+---------------------------------------------
+
+.. automodule:: repo_splitter.git_tools.files.wanted
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: repo_splitter.git_tools.files
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,69 @@
+repo\_splitter.git\_tools package
+=================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+   repo_splitter.git_tools.files
+
+Submodules
+----------
+
+repo\_splitter.git\_tools.clone module
+--------------------------------------
+
+.. automodule:: repo_splitter.git_tools.clone
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.history module
+----------------------------------------
+
+.. automodule:: repo_splitter.git_tools.history
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.push module
+-------------------------------------
+
+.. automodule:: repo_splitter.git_tools.push
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.remote module
+---------------------------------------
+
+.. automodule:: repo_splitter.git_tools.remote
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.track module
+--------------------------------------
+
+.. automodule:: repo_splitter.git_tools.track
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.git\_tools.url module
+------------------------------------
+
+.. automodule:: repo_splitter.git_tools.url
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: repo_splitter.git_tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
