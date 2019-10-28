@@ -72,12 +72,19 @@ class GitFilterBranchException(Exception):
         return output[last_commit_start:]
 
     def __str__(self):
+        try:
+            stdout = GitFilterBranchException._extract_from_last_commit(self.stdout)
+            stderr = GitFilterBranchException._extract_from_last_commit(self.stderr)
+        except IndexError:
+            stdout = self.stdout
+            stderr = self.stderr
+
         message = f"""
         Stdout:
-        {GitFilterBranchException._extract_from_last_commit(self.stdout)}
+        {stdout}
 
         Stderr:
-        {GitFilterBranchException._extract_from_last_commit(self.stderr)}
+        {stderr}
 
         Note: Full stdout and stderr available in exception exc.stdout and exc.stderr
         """
