@@ -123,6 +123,7 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
     :return:
     """
     if keep_backup:
+        backup_dir = _set_backup_dir(backup_dir, os.getcwd())
         backup_repo = clone_repo(repo_source, backup_dir, all_branches=True)
 
     print(f'Cleaning up what was split off in the old repo')
