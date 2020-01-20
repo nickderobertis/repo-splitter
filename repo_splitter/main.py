@@ -20,7 +20,8 @@ from repo_splitter.github_tools.query import github_repo_from_clone_url
 def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files: Sequence[str],
                github_token: str, all_branches: bool = False, include_tags: bool = False,
                remove_files_from_old_repo: bool = True, keep_backup: bool = True,
-               auto_push_remove: bool = False, backup_dir: Optional[str] = None):
+               auto_push_remove: bool = False, backup_dir: Optional[str] = None,
+               follow_renames: bool = True):
     """
     Splits an existing Git repository into two repositories by selecting which files should be
     split into a new one.
@@ -36,6 +37,7 @@ def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files:
     :param keep_backup: whether to retain a backup of the original repo in case something went wrong in removing history
     :param auto_push_remove: pass True to avoid prompt for whether to push the original repo with history removed
     :param backup_dir: pass file path to put backup of old repo there, otherwise uses repo_dest
+    :param follow_renames: Whether to track previous names of files from the history and also include those
     :return:
     """
     if keep_backup:
@@ -48,7 +50,8 @@ def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files:
         keep_files,
         github_token,
         all_branches=all_branches,
-        include_tags=include_tags
+        include_tags=include_tags,
+        follow_renames=follow_renames
     )
 
     if not remove_files_from_old_repo:
@@ -61,21 +64,23 @@ def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files:
         github_token,
         keep_backup=keep_backup,
         auto_push_remove=auto_push_remove,
-        backup_dir=backup_dir
+        backup_dir=backup_dir,
+        follow_renames=follow_renames
     )
 
 
 
 
 def _split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files: Sequence[str],
-                github_token: str, all_branches: bool = False, include_tags: bool = False) -> Repo:
+                github_token: str, all_branches: bool = False, include_tags: bool = False,
+                follow_renames: bool = True) -> Repo:
     with tempfile.TemporaryDirectory() as repo_temp_dest:
         print(f'Creating temporary repo from {repo_source}')
         repo = clone_repo(repo_source, repo_temp_dest, all_branches=all_branches)
         delete_remote(repo)
 
         print('Removing unwanted history from temporary repo')
-        remove_history_for_files_not_matching(repo, keep_files)
+        remove_history_for_files_not_matching(repo, keep_files, follow_renames=follow_renames)
 
         print(f'Creating Github repo {new_repo_name}')
         github_repo = create_repo(github_token, new_repo_name)
@@ -110,7 +115,8 @@ def _set_backup_dir(backup_dir: str, repo_dest: str, require_empty: bool = True)
 
 def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
                              github_token: str, keep_backup: bool = True,
-                             auto_push_remove: bool = False, backup_dir: Optional[str] = None):
+                             auto_push_remove: bool = False, backup_dir: Optional[str] = None,
+                             follow_renames: bool = True):
     """
     Remove the passed files from the repo history entirely
 
@@ -120,6 +126,7 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
     :param keep_backup: whether to retain a backup of the original repo in case something went wrong in removing history
     :param auto_push_remove: pass True to avoid prompt for whether to push the original repo with history removed
     :param backup_dir: pass file path to put backup of old repo there, otherwise uses repo_dest
+    :param follow_renames: Whether to track previous names of files from the history and also include those
     :return:
     """
     if keep_backup:
@@ -137,7 +144,7 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
             connect_local_repo_to_github_repo(repo, github_repo, github_token)
 
         print(f'Removing history in the original repo for files which were split off')
-        remove_history_for_files_matching(repo, drop_files)
+        remove_history_for_files_matching(repo, drop_files, follow_renames=follow_renames)
 
         if not auto_push_remove:
             print('Success. Please inspect the old repo to make sure nothing that was needed was removed.')

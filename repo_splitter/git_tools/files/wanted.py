@@ -4,8 +4,11 @@ import glob
 
 from git import Repo
 
+from repo_splitter.git_tools.files.renames import all_file_names_which_have_contained_the_lines_in_multiple_files
 
-def get_desired_files_from_patterns(repo: Repo, file_patterns: Sequence[str]) -> List[str]:
+
+def get_desired_files_from_patterns(repo: Repo, file_patterns: Sequence[str],
+                                    follow_renames: bool = True) -> List[str]:
     """
     Pass glob file patterns relative to repo root such as data/** or code/* or code/my_module.py
 
@@ -14,6 +17,7 @@ def get_desired_files_from_patterns(repo: Repo, file_patterns: Sequence[str]) ->
     :param repo:
     :param file_patterns: A sequence of glob file patterns relative to repo root such as
     data/** or code/* or code/my_module.py
+    :param follow_renames: Whether to track previous names of files from the history and also include those
     :return:
     """
     current_dir = os.getcwd()
@@ -22,4 +26,11 @@ def get_desired_files_from_patterns(repo: Repo, file_patterns: Sequence[str]) ->
     for file_pattern in file_patterns:
         all_files.extend(glob.glob(file_pattern, recursive=True))
     os.chdir(current_dir)
+
+    if follow_renames:
+        print(f'Following renames for {all_files}')
+        extended_files = all_file_names_which_have_contained_the_lines_in_multiple_files(all_files, repo)
+        print(f'After tracking renames, added {extended_files.difference(set(all_files))} to file list.')
+        all_files = list(extended_files)
+
     return all_files

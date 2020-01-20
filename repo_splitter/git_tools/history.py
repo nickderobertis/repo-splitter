@@ -10,13 +10,13 @@ from repo_splitter.git_tools.files.wanted import get_desired_files_from_patterns
 START_COMMIT_PATTERN = r"Start of output for commit: [\d\w]+"
 
 
-def remove_history_for_files_not_matching(repo: Repo, file_patterns: Sequence[str]):
-    wanted_files = get_desired_files_from_patterns(repo, file_patterns)
+def remove_history_for_files_not_matching(repo: Repo, file_patterns: Sequence[str], follow_renames: bool = True):
+    wanted_files = get_desired_files_from_patterns(repo, file_patterns, follow_renames=follow_renames)
     _remove_history_except_for_files(repo, wanted_files)
 
 
-def remove_history_for_files_matching(repo: Repo, file_patterns: Sequence[str]):
-    unmatched_files = get_unwanted_files_from_repo(repo, file_patterns)
+def remove_history_for_files_matching(repo: Repo, file_patterns: Sequence[str], follow_renames: bool = True):
+    unmatched_files = get_unwanted_files_from_repo(repo, file_patterns, follow_renames=follow_renames)
     _remove_history_except_for_files(repo, unmatched_files)
 
 
