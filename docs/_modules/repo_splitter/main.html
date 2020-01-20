@@ -177,7 +177,8 @@
             <span class="n">delete_remote</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
             <span class="n">connect_local_repo_to_github_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">github_repo</span><span class="p">,</span> <span class="n">github_token</span><span class="p">)</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Removing history in the original repo for files which were split off&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Removing history in the original repo for files which were split off. &#39;</span>
+              <span class="n">f</span><span class="s1">&#39;Note: this will take a long time for larger repos&#39;</span><span class="p">)</span>
         <span class="n">remove_history_for_files_matching</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">drop_files</span><span class="p">,</span> <span class="n">follow_renames</span><span class="o">=</span><span class="n">follow_renames</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">auto_push_remove</span><span class="p">:</span>

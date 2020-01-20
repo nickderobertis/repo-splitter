@@ -55,12 +55,23 @@ details of how to use the CLI, run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">split</span> <span class="o">--</span><span class="n">help</span>
 </pre></div>
 </div>
-<p>A typical usage would be as follows:</p>
+<p>A typical usage to create the new repo and remove history from the old repo
+would be as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">split</span> \
     <span class="s1">&#39;https://github.com/myuser/my-repo.git&#39;</span> \
     <span class="n">my_out_dir</span> <span class="n">new</span><span class="o">-</span><span class="n">repo</span><span class="o">-</span><span class="n">name</span> \
     <span class="s1">&#39;[&quot;files/to/remove&quot;, &quot;relative/paths/**/with/globs&quot;]&#39;</span> \
     <span class="mi">09</span><span class="n">fgdfg5540d65sa565565d45694</span>
+</pre></div>
+</div>
+<p>A typical usage to create the new repo, but leave the old repo history untouched,
+would be as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repo</span><span class="o">-</span><span class="n">splitter</span> <span class="n">split</span> \
+    <span class="s1">&#39;https://github.com/myuser/my-repo.git&#39;</span> \
+    <span class="n">my_out_dir</span> <span class="n">new</span><span class="o">-</span><span class="n">repo</span><span class="o">-</span><span class="n">name</span> \
+    <span class="s1">&#39;[&quot;files/to/remove&quot;, &quot;relative/paths/**/with/globs&quot;]&#39;</span> \
+    <span class="mi">09</span><span class="n">fgdfg5540d65sa565565d45694</span> \
+    <span class="o">--</span><span class="n">noremove_files_from_old_repo</span>
 </pre></div>
 </div>
 <p>For details on usage from Python, see <a class="reference internal" href="api/repo_splitter.html#repo_splitter.main.split_repo" title="repo_splitter.main.split_repo"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_repo()</span></code></a>.</p>

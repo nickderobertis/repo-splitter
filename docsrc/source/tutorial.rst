@@ -25,13 +25,25 @@ details of how to use the CLI, run::
 
     repo-splitter split --help
 
-A typical usage would be as follows::
+A typical usage to create the new repo and remove history from the old repo
+would be as follows::
 
     repo-splitter split \
         'https://github.com/myuser/my-repo.git' \
         my_out_dir new-repo-name \
         '["files/to/remove", "relative/paths/**/with/globs"]' \
         09fgdfg5540d65sa565565d45694
+
+
+A typical usage to create the new repo, but leave the old repo history untouched,
+would be as follows::
+
+    repo-splitter split \
+        'https://github.com/myuser/my-repo.git' \
+        my_out_dir new-repo-name \
+        '["files/to/remove", "relative/paths/**/with/globs"]' \
+        09fgdfg5540d65sa565565d45694 \
+        --noremove_files_from_old_repo
 
 
 For details on usage from Python, see :py:func:`.split_repo`.
