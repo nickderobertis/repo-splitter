@@ -143,7 +143,8 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
             delete_remote(repo)
             connect_local_repo_to_github_repo(repo, github_repo, github_token)
 
-        print(f'Removing history in the original repo for files which were split off')
+        print(f'Removing history in the original repo for files which were split off. '
+              f'Note: this will take a long time for larger repos')
         remove_history_for_files_matching(repo, drop_files, follow_renames=follow_renames)
 
         if not auto_push_remove:
