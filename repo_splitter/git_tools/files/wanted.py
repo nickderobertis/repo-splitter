@@ -29,8 +29,10 @@ def get_desired_files_from_patterns(repo: Repo, file_patterns: Sequence[str],
 
     if follow_renames:
         print(f'Following renames for {all_files}')
-        extended_files = all_file_names_which_have_contained_the_lines_in_multiple_files(all_files, repo)
-        print(f'After tracking renames, added {extended_files.difference(set(all_files))} to file list.')
-        all_files = list(extended_files)
+        all_files_set = set(all_files)
+        new_files = all_file_names_which_have_contained_the_lines_in_multiple_files(all_files, repo)
+        print(f'After tracking renames, added {new_files.difference(all_files_set)} to file list.')
+        all_files_set.update(new_files)
+        all_files = list(all_files_set)
 
     return all_files
