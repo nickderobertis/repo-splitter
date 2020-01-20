@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools package &#8212; repo_splitter 0.2.1 documentation</title>
+    <title>repo_splitter.git_tools package &#8212; repo_splitter 0.3.0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
@@ -42,6 +42,7 @@
 <li class="toctree-l1"><a class="reference internal" href="repo_splitter.git_tools.files.html">repo_splitter.git_tools.files package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="repo_splitter.git_tools.files.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.all">repo_splitter.git_tools.files.all module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.renames">repo_splitter.git_tools.files.renames module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.unwanted">repo_splitter.git_tools.files.unwanted module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.wanted">repo_splitter.git_tools.files.wanted module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files">Module contents</a></li>
@@ -92,12 +93,12 @@
 
 <dl class="function">
 <dt id="repo_splitter.git_tools.history.remove_history_for_files_matching">
-<code class="sig-prename descclassname">repo_splitter.git_tools.history.</code><code class="sig-name descname">remove_history_for_files_matching</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/history.html#remove_history_for_files_matching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.history.remove_history_for_files_matching" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">repo_splitter.git_tools.history.</code><code class="sig-name descname">remove_history_for_files_matching</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em>, <em class="sig-param">follow_renames=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/history.html#remove_history_for_files_matching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.history.remove_history_for_files_matching" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="repo_splitter.git_tools.history.remove_history_for_files_not_matching">
-<code class="sig-prename descclassname">repo_splitter.git_tools.history.</code><code class="sig-name descname">remove_history_for_files_not_matching</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/history.html#remove_history_for_files_not_matching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.history.remove_history_for_files_not_matching" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">repo_splitter.git_tools.history.</code><code class="sig-name descname">remove_history_for_files_not_matching</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em>, <em class="sig-param">follow_renames=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/history.html#remove_history_for_files_not_matching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.history.remove_history_for_files_not_matching" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -247,7 +248,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Nick DeRobertis.
+      &copy;2020, Nick DeRobertis.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

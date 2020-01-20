@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.files package &#8212; repo_splitter 0.2.1 documentation</title>
+    <title>repo_splitter.git_tools.files package &#8212; repo_splitter 0.3.0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
@@ -51,11 +51,102 @@
 </dd></dl>
 
 </div>
+<div class="section" id="module-repo_splitter.git_tools.files.renames">
+<span id="repo-splitter-git-tools-files-renames-module"></span><h2>repo_splitter.git_tools.files.renames module<a class="headerlink" href="#module-repo_splitter.git_tools.files.renames" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="repo_splitter.git_tools.files.renames.EmptyFileException">
+<em class="property">exception </em><code class="sig-prename descclassname">repo_splitter.git_tools.files.renames.</code><code class="sig-name descname">EmptyFileException</code><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/renames.html#EmptyFileException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.renames.EmptyFileException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file">
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.renames.</code><code class="sig-name descname">all_file_names_which_have_contained_the_lines_in_a_file</code><span class="sig-paren">(</span><em class="sig-param">file_path</em>, <em class="sig-param">repo</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/renames.html#all_file_names_which_have_contained_the_lines_in_a_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the git log for all lines in a file, to determine all the file paths in which these lines
+have existed.</p>
+<p>Useful for tracking renames in a repo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file.params.file_path"></span><strong>file_path</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file.params.file_path">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Relative path to file within repo</p></li>
+<li><p><span class="target" id="repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file.params.repo"></span><strong>repo</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file.params.repo">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Repo</span></code>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files">
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.renames.</code><code class="sig-name descname">all_file_names_which_have_contained_the_lines_in_multiple_files</code><span class="sig-paren">(</span><em class="sig-param">file_paths</em>, <em class="sig-param">repo</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/renames.html#all_file_names_which_have_contained_the_lines_in_multiple_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the git log for all lines in multiple files, to determine all the file paths in which these lines
+have existed.</p>
+<p>Useful for tracking renames in a repo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files.params.file_paths"></span><strong>file_paths</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files.params.file_paths">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Relative paths to file within repo</p></li>
+<li><p><span class="target" id="repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files.params.repo"></span><strong>repo</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files.params.repo">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Repo</span></code>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="repo_splitter.git_tools.files.renames.file_length">
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.renames.</code><code class="sig-name descname">file_length</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/renames.html#file_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.renames.file_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of lines in a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="repo_splitter.git_tools.files.renames.full_git_history_for_contents_of_file">
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.renames.</code><code class="sig-name descname">full_git_history_for_contents_of_file</code><span class="sig-paren">(</span><em class="sig-param">file_path</em>, <em class="sig-param">repo</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/renames.html#full_git_history_for_contents_of_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.renames.full_git_history_for_contents_of_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs git log on all of the lines in a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="repo_splitter.git_tools.files.renames.get_filenames_from_git_log">
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.renames.</code><code class="sig-name descname">get_filenames_from_git_log</code><span class="sig-paren">(</span><em class="sig-param">git_log</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/renames.html#get_filenames_from_git_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.renames.get_filenames_from_git_log" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><span class="target" id="repo_splitter.git_tools.files.renames.get_filenames_from_git_log.params.git_log"></span><strong>git_log</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.renames.get_filenames_from_git_log.params.git_log">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="module-repo_splitter.git_tools.files.unwanted">
 <span id="repo-splitter-git-tools-files-unwanted-module"></span><h2>repo_splitter.git_tools.files.unwanted module<a class="headerlink" href="#module-repo_splitter.git_tools.files.unwanted" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="repo_splitter.git_tools.files.unwanted.get_unwanted_files_from_repo">
-<code class="sig-prename descclassname">repo_splitter.git_tools.files.unwanted.</code><code class="sig-name descname">get_unwanted_files_from_repo</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/unwanted.html#get_unwanted_files_from_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.unwanted.get_unwanted_files_from_repo" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.unwanted.</code><code class="sig-name descname">get_unwanted_files_from_repo</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em>, <em class="sig-param">follow_renames=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/unwanted.html#get_unwanted_files_from_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.unwanted.get_unwanted_files_from_repo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -63,7 +154,7 @@
 <span id="repo-splitter-git-tools-files-wanted-module"></span><h2>repo_splitter.git_tools.files.wanted module<a class="headerlink" href="#module-repo_splitter.git_tools.files.wanted" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns">
-<code class="sig-prename descclassname">repo_splitter.git_tools.files.wanted.</code><code class="sig-name descname">get_desired_files_from_patterns</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/wanted.html#get_desired_files_from_patterns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.wanted.</code><code class="sig-name descname">get_desired_files_from_patterns</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">file_patterns</em>, <em class="sig-param">follow_renames=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/wanted.html#get_desired_files_from_patterns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pass glob file patterns relative to repo root such as data/** or code/* or code/my_module.py</p>
 <p>Handles resolving within the repo, and expanding globs into full relative file paths</p>
 <dl class="field-list simple">
@@ -75,6 +166,8 @@
 </dd>
 </dl>
 <p>data/** or code/* or code/my_module.py
+:type _sphinx_paramlinks_repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns.follow_renames: <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>
+:param _sphinx_paramlinks_repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns.follow_renames: Whether to track previous names of files from the history and also include those
 :rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]
 :return:</p>
 </dd></dl>
@@ -105,6 +198,7 @@
 <li class="toctree-l6 current"><a class="current reference internal" href="#">repo_splitter.git_tools.files package</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l7"><a class="reference internal" href="#module-repo_splitter.git_tools.files.all">repo_splitter.git_tools.files.all module</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#module-repo_splitter.git_tools.files.renames">repo_splitter.git_tools.files.renames module</a></li>
 <li class="toctree-l7"><a class="reference internal" href="#module-repo_splitter.git_tools.files.unwanted">repo_splitter.git_tools.files.unwanted module</a></li>
 <li class="toctree-l7"><a class="reference internal" href="#module-repo_splitter.git_tools.files.wanted">repo_splitter.git_tools.files.wanted module</a></li>
 <li class="toctree-l7"><a class="reference internal" href="#module-repo_splitter.git_tools.files">Module contents</a></li>
@@ -163,7 +257,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Nick DeRobertis.
+      &copy;2020, Nick DeRobertis.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

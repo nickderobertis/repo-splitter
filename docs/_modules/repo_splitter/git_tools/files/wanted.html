@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.files.wanted &#8212; repo_splitter 0.2.1 documentation</title>
+    <title>repo_splitter.git_tools.files.wanted &#8212; repo_splitter 0.3.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_paramlinks.css" />
@@ -38,8 +38,11 @@
 
 <span class="kn">from</span> <span class="nn">git</span> <span class="k">import</span> <span class="n">Repo</span>
 
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.renames</span> <span class="k">import</span> <span class="n">all_file_names_which_have_contained_the_lines_in_multiple_files</span>
 
-<div class="viewcode-block" id="get_desired_files_from_patterns"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns">[docs]</a><span class="k">def</span> <span class="nf">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="get_desired_files_from_patterns"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns">[docs]</a><span class="k">def</span> <span class="nf">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                    <span class="n">follow_renames</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pass glob file patterns relative to repo root such as data/** or code/* or code/my_module.py</span>
 
@@ -48,6 +51,7 @@
 <span class="sd">    :param repo:</span>
 <span class="sd">    :param file_patterns: A sequence of glob file patterns relative to repo root such as</span>
 <span class="sd">    data/** or code/* or code/my_module.py</span>
+<span class="sd">    :param follow_renames: Whether to track previous names of files from the history and also include those</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
@@ -56,6 +60,13 @@
     <span class="k">for</span> <span class="n">file_pattern</span> <span class="ow">in</span> <span class="n">file_patterns</span><span class="p">:</span>
         <span class="n">all_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">file_pattern</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">current_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">follow_renames</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Following renames for </span><span class="si">{all_files}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">extended_files</span> <span class="o">=</span> <span class="n">all_file_names_which_have_contained_the_lines_in_multiple_files</span><span class="p">(</span><span class="n">all_files</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;After tracking renames, added {extended_files.difference(set(all_files))} to file list.&#39;</span><span class="p">)</span>
+        <span class="n">all_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">extended_files</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">all_files</span></div>
 </pre></div>
 
@@ -96,7 +107,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Nick DeRobertis.
+      &copy;2020, Nick DeRobertis.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

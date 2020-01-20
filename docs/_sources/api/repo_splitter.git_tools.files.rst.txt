@@ -12,6 +12,14 @@ repo\_splitter.git\_tools.files.all module
    :undoc-members:
    :show-inheritance:
 
+repo\_splitter.git\_tools.files.renames module
+----------------------------------------------
+
+.. automodule:: repo_splitter.git_tools.files.renames
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 repo\_splitter.git\_tools.files.unwanted module
 -----------------------------------------------
 

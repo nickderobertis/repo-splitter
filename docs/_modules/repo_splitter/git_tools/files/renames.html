@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>repo_splitter.git_tools.files.renames &#8212; repo_splitter 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_paramlinks.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for repo_splitter.git_tools.files.renames</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="kn">from</span> <span class="nn">git</span> <span class="k">import</span> <span class="n">Repo</span>
+
+
+<div class="viewcode-block" id="all_file_names_which_have_contained_the_lines_in_multiple_files"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files">[docs]</a><span class="k">def</span> <span class="nf">all_file_names_which_have_contained_the_lines_in_multiple_files</span><span class="p">(</span><span class="n">file_paths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the git log for all lines in multiple files, to determine all the file paths in which these lines</span>
+<span class="sd">    have existed.</span>
+
+<span class="sd">    Useful for tracking renames in a repo.</span>
+
+<span class="sd">    :param file_paths: Relative paths to file within repo</span>
+<span class="sd">    :param repo:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">in_file</span> <span class="ow">in</span> <span class="n">file_paths</span><span class="p">:</span>
+        <span class="n">all_names</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">all_file_names_which_have_contained_the_lines_in_a_file</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_names</span></div>
+
+
+<div class="viewcode-block" id="all_file_names_which_have_contained_the_lines_in_a_file"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_a_file">[docs]</a><span class="k">def</span> <span class="nf">all_file_names_which_have_contained_the_lines_in_a_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the git log for all lines in a file, to determine all the file paths in which these lines</span>
+<span class="sd">    have existed.</span>
+
+<span class="sd">    Useful for tracking renames in a repo.</span>
+
+<span class="sd">    :param file_path: Relative path to file within repo</span>
+<span class="sd">    :param repo:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">working_tree_dir</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+        <span class="c1"># Cannot detect changes directly on a directory</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="n">full_git_history_for_contents_of_file</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">EmptyFileException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="n">unique_matches</span> <span class="o">=</span> <span class="n">get_filenames_from_git_log</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unique_matches</span></div>
+
+
+<div class="viewcode-block" id="full_git_history_for_contents_of_file"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.full_git_history_for_contents_of_file">[docs]</a><span class="k">def</span> <span class="nf">full_git_history_for_contents_of_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs git log on all of the lines in a file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_lines</span> <span class="o">=</span> <span class="n">file_length</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_lines</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">EmptyFileException</span><span class="p">(</span><span class="s1">&#39;could not track history of lines in an empty file&#39;</span><span class="p">)</span>
+    <span class="n">file_search_str</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;1,</span><span class="si">{num_lines}</span><span class="s1">:</span><span class="si">{file_path}</span><span class="s1">&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;--format=oneline&#39;</span><span class="p">,</span> <span class="s1">&#39;--compact-summary&#39;</span><span class="p">,</span> <span class="s1">&#39;-L&#39;</span><span class="p">,</span> <span class="n">file_search_str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">log</span></div>
+
+
+<div class="viewcode-block" id="get_filenames_from_git_log"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.get_filenames_from_git_log">[docs]</a><span class="k">def</span> <span class="nf">get_filenames_from_git_log</span><span class="p">(</span><span class="n">git_log</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param git_log:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;--- a\/(.+)\n\+\+\+ b\/(.+)&#39;</span><span class="p">)</span>
+    <span class="n">match_tuples</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">git_log</span><span class="p">)</span>
+    <span class="n">unique_matches</span> <span class="o">=</span> <span class="p">{</span><span class="n">file</span> <span class="k">for</span> <span class="n">match_tup</span> <span class="ow">in</span> <span class="n">match_tuples</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">match_tup</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">unique_matches</span></div>
+
+
+<div class="viewcode-block" id="file_length"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.file_length">[docs]</a><span class="k">def</span> <span class="nf">file_length</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the number of lines in a file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="EmptyFileException"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.EmptyFileException">[docs]</a><span class="k">class</span> <span class="nc">EmptyFileException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Getting started with repo_splitter</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">repo_splitter</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Nick DeRobertis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

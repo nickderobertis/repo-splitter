@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter package &#8212; repo_splitter 0.2.1 documentation</title>
+    <title>repo_splitter package &#8212; repo_splitter 0.3.0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
@@ -44,6 +44,7 @@
 <li class="toctree-l3"><a class="reference internal" href="repo_splitter.git_tools.files.html">repo_splitter.git_tools.files package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.files.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.all">repo_splitter.git_tools.files.all module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.renames">repo_splitter.git_tools.files.renames module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.unwanted">repo_splitter.git_tools.files.unwanted module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files.wanted">repo_splitter.git_tools.files.wanted module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="repo_splitter.git_tools.files.html#module-repo_splitter.git_tools.files">Module contents</a></li>
@@ -84,7 +85,7 @@
 
 <dl class="function">
 <dt id="repo_splitter.main.remove_from_repo_history">
-<code class="sig-prename descclassname">repo_splitter.main.</code><code class="sig-name descname">remove_from_repo_history</code><span class="sig-paren">(</span><em class="sig-param">repo_source</em>, <em class="sig-param">drop_files</em>, <em class="sig-param">github_token</em>, <em class="sig-param">keep_backup=True</em>, <em class="sig-param">auto_push_remove=False</em>, <em class="sig-param">backup_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/main.html#remove_from_repo_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.main.remove_from_repo_history" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">repo_splitter.main.</code><code class="sig-name descname">remove_from_repo_history</code><span class="sig-paren">(</span><em class="sig-param">repo_source</em>, <em class="sig-param">drop_files</em>, <em class="sig-param">github_token</em>, <em class="sig-param">keep_backup=True</em>, <em class="sig-param">auto_push_remove=False</em>, <em class="sig-param">backup_dir=None</em>, <em class="sig-param">follow_renames=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/main.html#remove_from_repo_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.main.remove_from_repo_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove the passed files from the repo history entirely</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -95,6 +96,7 @@
 <li><p><span class="target" id="repo_splitter.main.remove_from_repo_history.params.keep_backup"></span><strong>keep_backup</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.remove_from_repo_history.params.keep_backup">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to retain a backup of the original repo in case something went wrong in removing history</p></li>
 <li><p><span class="target" id="repo_splitter.main.remove_from_repo_history.params.auto_push_remove"></span><strong>auto_push_remove</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.remove_from_repo_history.params.auto_push_remove">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – pass True to avoid prompt for whether to push the original repo with history removed</p></li>
 <li><p><span class="target" id="repo_splitter.main.remove_from_repo_history.params.backup_dir"></span><strong>backup_dir</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.remove_from_repo_history.params.backup_dir">¶</a> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – pass file path to put backup of old repo there, otherwise uses repo_dest</p></li>
+<li><p><span class="target" id="repo_splitter.main.remove_from_repo_history.params.follow_renames"></span><strong>follow_renames</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.remove_from_repo_history.params.follow_renames">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to track previous names of files from the history and also include those</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -124,7 +126,7 @@
 
 <dl class="function">
 <dt id="repo_splitter.main.split_repo">
-<code class="sig-prename descclassname">repo_splitter.main.</code><code class="sig-name descname">split_repo</code><span class="sig-paren">(</span><em class="sig-param">repo_source</em>, <em class="sig-param">repo_dest</em>, <em class="sig-param">new_repo_name</em>, <em class="sig-param">keep_files</em>, <em class="sig-param">github_token</em>, <em class="sig-param">all_branches=False</em>, <em class="sig-param">include_tags=False</em>, <em class="sig-param">remove_files_from_old_repo=True</em>, <em class="sig-param">keep_backup=True</em>, <em class="sig-param">auto_push_remove=False</em>, <em class="sig-param">backup_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/main.html#split_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.main.split_repo" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">repo_splitter.main.</code><code class="sig-name descname">split_repo</code><span class="sig-paren">(</span><em class="sig-param">repo_source</em>, <em class="sig-param">repo_dest</em>, <em class="sig-param">new_repo_name</em>, <em class="sig-param">keep_files</em>, <em class="sig-param">github_token</em>, <em class="sig-param">all_branches=False</em>, <em class="sig-param">include_tags=False</em>, <em class="sig-param">remove_files_from_old_repo=True</em>, <em class="sig-param">keep_backup=True</em>, <em class="sig-param">auto_push_remove=False</em>, <em class="sig-param">backup_dir=None</em>, <em class="sig-param">follow_renames=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/main.html#split_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.main.split_repo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits an existing Git repository into two repositories by selecting which files should be
 split into a new one.</p>
 <dl class="field-list simple">
@@ -141,6 +143,7 @@ split into a new one.</p>
 <li><p><span class="target" id="repo_splitter.main.split_repo.params.keep_backup"></span><strong>keep_backup</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.split_repo.params.keep_backup">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to retain a backup of the original repo in case something went wrong in removing history</p></li>
 <li><p><span class="target" id="repo_splitter.main.split_repo.params.auto_push_remove"></span><strong>auto_push_remove</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.split_repo.params.auto_push_remove">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – pass True to avoid prompt for whether to push the original repo with history removed</p></li>
 <li><p><span class="target" id="repo_splitter.main.split_repo.params.backup_dir"></span><strong>backup_dir</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.split_repo.params.backup_dir">¶</a> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – pass file path to put backup of old repo there, otherwise uses repo_dest</p></li>
+<li><p><span class="target" id="repo_splitter.main.split_repo.params.follow_renames"></span><strong>follow_renames</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.main.split_repo.params.follow_renames">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to track previous names of files from the history and also include those</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -208,7 +211,7 @@ split into a new one.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Nick DeRobertis.
+      &copy;2020, Nick DeRobertis.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

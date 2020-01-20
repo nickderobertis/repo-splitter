@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.files.unwanted &#8212; repo_splitter 0.2.1 documentation</title>
+    <title>repo_splitter.git_tools.files.unwanted &#8212; repo_splitter 0.3.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_paramlinks.css" />
@@ -40,9 +40,9 @@
 <span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.wanted</span> <span class="k">import</span> <span class="n">get_desired_files_from_patterns</span>
 
 
-<div class="viewcode-block" id="get_unwanted_files_from_repo"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.unwanted.get_unwanted_files_from_repo">[docs]</a><span class="k">def</span> <span class="nf">get_unwanted_files_from_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="get_unwanted_files_from_repo"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.unwanted.get_unwanted_files_from_repo">[docs]</a><span class="k">def</span> <span class="nf">get_unwanted_files_from_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">follow_renames</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="n">all_files</span> <span class="o">=</span> <span class="n">get_all_repo_files</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
-    <span class="n">wanted_files</span> <span class="o">=</span> <span class="n">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">)</span>
+    <span class="n">wanted_files</span> <span class="o">=</span> <span class="n">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">,</span> <span class="n">follow_renames</span><span class="o">=</span><span class="n">follow_renames</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">wanted_files</span><span class="p">]</span></div>
 </pre></div>
@@ -84,7 +84,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Nick DeRobertis.
+      &copy;2020, Nick DeRobertis.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
