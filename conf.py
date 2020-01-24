@@ -70,6 +70,6 @@ CONSOLE_SCRIPTS = ['repo-splitter=repo_splitter.main:main'],
 SCRIPTS = []
 
 PACKAGE_URLS = {
-    'Code': 'https://github.com/whoopnip/repo-splitter/',
-    'Documentation': 'https://whoopnip.github.io/repo-splitter/'
+    'Code': 'https://github.com/nickderobertis/repo-splitter/',
+    'Documentation': 'https://nickderobertis.github.io/repo-splitter/'
 }
