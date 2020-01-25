@@ -21,14 +21,18 @@ def remove_history_for_files_matching(repo: Repo, file_patterns: Sequence[str], 
 
 
 def _remove_history_except_for_files(repo: Repo, files: Sequence[str]) -> str:
-    starts_with_wanted_files = ['^' + file for file in files]
+    # Regex match for grep. Need to include ^$ as git log sends back one empty line, this will remove it
+    starts_with_wanted_files = ['^' + file for file in files + ['$']]
     wanted_files_str = '|'.join(starts_with_wanted_files)
-    # Need to check if any files come back from ls-files not in wanted files. If empty, this means that the only
+
+    # Now form ALL_FILES in bash as the files which should be removed. git log will return all the files which
+    # were ever added (A), renamed (R), or copied (C). Then using grep with the -v flag means take the files
+    # not matching the passed files. If if condition is there because if ALL_FILES is empty, this means that the only
     # remaining files are the desired files, which means that nothing should be done.
     index_filter_cmd = f"""
-    ALL_FILES=$(git ls-files | grep -vE "{wanted_files_str}");
-    if [ -n "$ALL_FILES" ]; then 
-        printf "$ALL_FILES" | xargs --delimiter="\\n" git rm -rf --cached --ignore-unmatch; 
+    ALL_FILES=$(git log --pretty=format: --name-only --diff-filter=ARC | sort -u | grep -vE "{wanted_files_str}");
+    if [ -n "$ALL_FILES" ]; then
+        printf "$ALL_FILES" | xargs --delimiter="\\n" git rm -rf --cached --ignore-unmatch;
     fi
     """.strip()
 
