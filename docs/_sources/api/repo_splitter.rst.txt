@@ -9,18 +9,6 @@ Subpackages
    repo_splitter.git_tools
    repo_splitter.github_tools
 
-Submodules
-----------
-
-repo\_splitter.main module
---------------------------
-
-.. automodule:: repo_splitter.main
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
 Module contents
 ---------------
 

@@ -26,9 +26,9 @@ These are the Python commands. For examples and CLI usage, see :ref:`tutorial`.
 
 .. autosummary::
 
-      repo_splitter.main.split_repo
-      repo_splitter.main.remove_from_repo_history
-      repo_splitter.main.restore_from_backup
+      repo_splitter.__main__.split_repo
+      repo_splitter.__main__.remove_from_repo_history
+      repo_splitter.__main__.restore_from_backup
 
 
 API Documentation

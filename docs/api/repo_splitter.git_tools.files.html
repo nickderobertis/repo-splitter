@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.files package &#8212; repo_splitter 0.3.0 documentation</title>
+    <title>repo_splitter.git_tools.files package &#8212; repo_splitter 0.3.1 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
@@ -42,10 +42,21 @@
 <span id="repo-splitter-git-tools-files-all-module"></span><h2>repo_splitter.git_tools.files.all module<a class="headerlink" href="#module-repo_splitter.git_tools.files.all" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="repo_splitter.git_tools.files.all.get_all_repo_files">
-<code class="sig-prename descclassname">repo_splitter.git_tools.files.all.</code><code class="sig-name descname">get_all_repo_files</code><span class="sig-paren">(</span><em class="sig-param">repo</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/all.html#get_all_repo_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.all.get_all_repo_files" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<code class="sig-prename descclassname">repo_splitter.git_tools.files.all.</code><code class="sig-name descname">get_all_repo_files</code><span class="sig-paren">(</span><em class="sig-param">repo</em>, <em class="sig-param">current_files_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/repo_splitter/git_tools/files/all.html#get_all_repo_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repo_splitter.git_tools.files.all.get_all_repo_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the file paths from a repo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="repo_splitter.git_tools.files.all.get_all_repo_files.params.repo"></span><strong>repo</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.all.get_all_repo_files.params.repo">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Repo</span></code>) – git Repo</p></li>
+<li><p><span class="target" id="repo_splitter.git_tools.files.all.get_all_repo_files.params.current_files_only"></span><strong>current_files_only</strong><a class="paramlink headerlink reference internal" href="#repo_splitter.git_tools.files.all.get_all_repo_files.params.current_files_only">¶</a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if False, will search the entire git history for
+file names, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>File paths</p>
 </dd>
 </dl>
 </dd></dl>
@@ -219,8 +230,6 @@ have existed.</p>
 <li class="toctree-l4"><a class="reference internal" href="repo_splitter.github_tools.html">repo_splitter.github_tools package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="repo_splitter.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="repo_splitter.html#module-repo_splitter.main">repo_splitter.main module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="repo_splitter.html#module-repo_splitter">Module contents</a></li>
 </ul>
 </li>

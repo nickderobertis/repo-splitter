@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.history &#8212; repo_splitter 0.3.0 documentation</title>
+    <title>repo_splitter.git_tools.history &#8212; repo_splitter 0.3.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
@@ -55,14 +55,18 @@
 
 
 <span class="k">def</span> <span class="nf">_remove_history_except_for_files</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">starts_with_wanted_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;^&#39;</span> <span class="o">+</span> <span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+    <span class="c1"># Regex match for grep. Need to include ^$ as git log sends back one empty line, this will remove it</span>
+    <span class="n">starts_with_wanted_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;^&#39;</span> <span class="o">+</span> <span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;$&#39;</span><span class="p">]]</span>
     <span class="n">wanted_files_str</span> <span class="o">=</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">starts_with_wanted_files</span><span class="p">)</span>
-    <span class="c1"># Need to check if any files come back from ls-files not in wanted files. If empty, this means that the only</span>
+
+    <span class="c1"># Now form ALL_FILES in bash as the files which should be removed. git log will return all the files which</span>
+    <span class="c1"># were ever added (A), renamed (R), or copied (C). Then using grep with the -v flag means take the files</span>
+    <span class="c1"># not matching the passed files. If if condition is there because if ALL_FILES is empty, this means that the only</span>
     <span class="c1"># remaining files are the desired files, which means that nothing should be done.</span>
     <span class="n">index_filter_cmd</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    ALL_FILES=$(git ls-files | grep -vE &quot;</span><span class="si">{wanted_files_str}</span><span class="s2">&quot;);</span>
-<span class="s2">    if [ -n &quot;$ALL_FILES&quot; ]; then </span>
-<span class="s2">        printf &quot;$ALL_FILES&quot; | xargs --delimiter=&quot;</span><span class="se">\\</span><span class="s2">n&quot; git rm -rf --cached --ignore-unmatch; </span>
+<span class="s2">    ALL_FILES=$(git log --pretty=format: --name-only --diff-filter=ARC | sort -u | grep -vE &quot;</span><span class="si">{wanted_files_str}</span><span class="s2">&quot;);</span>
+<span class="s2">    if [ -n &quot;$ALL_FILES&quot; ]; then</span>
+<span class="s2">        printf &quot;$ALL_FILES&quot; | xargs --delimiter=&quot;</span><span class="se">\\</span><span class="s2">n&quot; git rm -rf --cached --ignore-unmatch;</span>
 <span class="s2">    fi</span>
 <span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 

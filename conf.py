@@ -5,7 +5,7 @@
 PACKAGE_NAME = 'repo_splitter'
 
 # Package version in the format (major, minor, release)
-PACKAGE_VERSION_TUPLE = (0, 3, 0)
+PACKAGE_VERSION_TUPLE = (0, 3, 1)
 
 # Short description of the package
 PACKAGE_SHORT_DESCRIPTION = 'A CLI tool to split a part of a git repo into another git repo, separating the history'
@@ -63,7 +63,7 @@ DOCS_OTHER_MOCK_IMPORTS = [
 
 # Add any Python scripts which should be exposed to the command line in the format:
 # CONSOLE_SCRIPTS = ['funniest-joke=funniest.command_line:main']
-CONSOLE_SCRIPTS = ['repo-splitter=repo_splitter.main:main'],
+CONSOLE_SCRIPTS = ['repo-splitter=repo_splitter.__main__:main'],
 
 # Add any arbitrary scripts to be exposed to the command line in the format:
 # SCRIPTS = ['bin/funniest-joke']
