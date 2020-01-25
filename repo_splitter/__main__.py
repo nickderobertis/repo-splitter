@@ -74,7 +74,7 @@ def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files:
 def _split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files: Sequence[str],
                 github_token: str, all_branches: bool = False, include_tags: bool = False,
                 follow_renames: bool = True) -> Repo:
-    with tempfile.TemporaryDirectory() as repo_temp_dest:
+    with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
         print(f'Creating temporary repo from {repo_source}')
         repo = clone_repo(repo_source, repo_temp_dest, all_branches=all_branches)
         delete_remote(repo)
@@ -134,7 +134,7 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
         backup_repo = clone_repo(repo_source, backup_dir, all_branches=True)
 
     print(f'Cleaning up what was split off in the old repo')
-    with tempfile.TemporaryDirectory() as repo_temp_dest:
+    with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
         print(f'Cloning {repo_source} into temporary directory {repo_temp_dest}')
         repo = clone_repo(repo_source, repo_temp_dest, all_branches=True)
         if is_remote_url(repo_source):

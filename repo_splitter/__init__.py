@@ -1,1 +1,1 @@
-from repo_splitter.main import split_repo, remove_from_repo_history, restore_from_backup
+from repo_splitter.__main__ import split_repo, remove_from_repo_history, restore_from_backup
