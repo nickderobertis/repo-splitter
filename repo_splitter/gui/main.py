@@ -1,8 +1,16 @@
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
+import tempfile
+import os
 
 import PySimpleGUI as sg
+from git import Repo
+
+from repo_splitter.git_tools.clone import clone_repo
+from repo_splitter.git_tools.remote import delete_remote
+from repo_splitter.git_tools.files.all import get_all_repo_files
+from repo_splitter.git_tools.files.wanted import get_desired_files_from_patterns
 
 
 FILES_LISTBOX_SETTINGS = dict(
@@ -24,6 +32,10 @@ class MustProvideRepoException(MustProvideInputException):
     pass
 
 
+class MustProvideOnlyOneRepoException(Exception):
+    pass
+
+
 @dataclass
 class SelectRepoConfig:
     new_repo_name: str
@@ -31,6 +43,7 @@ class SelectRepoConfig:
 
     repo_url: Optional[str] = None
     repo_local_path: Optional[str] = None
+    all_branches: Optional[bool] = False
 
     def __post_init__(self):
         print(self)
@@ -49,24 +62,42 @@ class SelectRepoConfig:
     def _validate_repo(self):
         if not self.repo_url and not self.repo_local_path:
             raise MustProvideRepoException
+        if self.repo_url and self.repo_local_path:
+            raise MustProvideOnlyOneRepoException
+
+    @property
+    def repo(self) -> str:
+        if self.repo_url:
+            return self.repo_url
+        if self.repo_local_path:
+            return self.repo_local_path
+        raise MustProvideRepoException
 
 
 
-def repo_select_gui() -> Optional[SelectRepoConfig]:
+def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[SelectRepoConfig]:
+    if not defaults:
+        defaults = dict(
+            repo_loc_url='',
+            new_repo_name='',
+            gh_token=''
+        )
+
     sg.theme(THEME)
 
     config: Optional[SelectRepoConfig] = None
 
     # All the stuff inside your window.
     layout = [  [sg.Text('Please select either a remote repo by URL or a local repo.')],
-                [sg.Text('Repo by URL:'), sg.InputText(key='repo_loc_url')],
+                [sg.Text('Repo by URL:'), sg.InputText(key='repo_loc_url', default_text=defaults['repo_loc_url'])],
                 [sg.Text('Local repo:'), sg.FolderBrowse(key='repo_loc_file_path')],
-                [sg.Text('New Repo Name:'), sg.InputText(key='new_repo_name')],
-                [sg.Text('Github Token:'), sg.InputText(key='gh_token')],
+                [sg.Text('New Repo Name:'), sg.InputText(key='new_repo_name', default_text=defaults['new_repo_name'])],
+                [sg.Text('Github Token:'), sg.InputText(key='gh_token', default_text=defaults['gh_token'])],
+                [sg.Checkbox('Split all branches:', key='all_branches')],
                 [sg.Button('Ok'), sg.Button('Cancel')] ]
 
     # Create the Window
-    window = sg.Window('Window Title', layout)
+    window = sg.Window('Repo Splitter - Select Repo', layout)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -79,10 +110,13 @@ def repo_select_gui() -> Optional[SelectRepoConfig]:
                     values['gh_token'],
                     repo_url=values['repo_loc_url'],
                     repo_local_path=values['repo_loc_file_path'],
+                    all_branches=values['all_branches']
                 )
                 break
             except MustProvideRepoException:
                 sg.Popup('Please provide either a repo URL or local repo path')
+            except MustProvideOnlyOneRepoException:
+                sg.Popup('Please provide only one of repo URL and local repo path')
             except MustProvideInputException as e:
                 sg.Popup(f'Please provide {e.input_name}')
 
@@ -90,29 +124,44 @@ def repo_select_gui() -> Optional[SelectRepoConfig]:
     return config
 
 
-def select_files_gui():
+def select_files_gui(files: List[str], repo: Repo):
     sg.theme(THEME)
 
-    orig_to_select = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    orig_to_select = files
     orig_selected = []
     all_items = orig_to_select + orig_selected
 
     # All the stuff inside your window.
     layout = [  [sg.Text('Please select which files should be split from the repo.')],
                 [
-                    sg.Listbox(orig_to_select, **FILES_LISTBOX_SETTINGS, key='files_to_select'),
+                    sg.Text('Enter a glob pattern:'),
+                    sg.InputText(key='file_pattern'),
+                    sg.Checkbox('Include renames', default=True, key='include_renames'),
+                    sg.Button('Match'),
+                ],
+                [
                     sg.Col([
+                        [sg.Text("Don't Split"), sg.Button('Sort', key='sort_left')],
+                        [sg.Listbox(orig_to_select, **FILES_LISTBOX_SETTINGS, key='files_to_select')],
+                    ]),
+                    sg.Col([
+                        [sg.Text('')],
+                        [sg.Text('')],
                         [sg.Button('>')],
                         [sg.Button('<')],
                         [sg.Button('>>')],
                         [sg.Button('<<')],
                     ]),
-                    sg.Listbox(orig_selected, **FILES_LISTBOX_SETTINGS, key='files_selected')
+                    sg.Col([
+                        [sg.Text("Split"), sg.Button('Sort', key='sort_right')],
+                        [sg.Listbox(orig_selected, **FILES_LISTBOX_SETTINGS, key='files_selected')],
+                    ]),
+
                 ],
                 [sg.Button('Ok'), sg.Button('Cancel')] ]
 
     # Create the Window
-    window = sg.Window('Window Title', layout)
+    window = sg.Window('Repo Splitter - Select Files', layout)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -124,7 +173,21 @@ def select_files_gui():
         right_listbox = window['files_selected']
         left_all_values = left_listbox.Values
         right_all_values = right_listbox.Values
-        if event == '>':
+        if event == 'Match':
+            # Handle glob match to move files to right
+            file_pattern = values['file_pattern']
+            include_renames = values['include_renames']
+            matched_files = get_desired_files_from_patterns(repo, [file_pattern], follow_renames=include_renames)
+            for item in matched_files:
+                if item in left_all_values:
+                    left_all_values.remove(item)
+                if item in all_items and item not in right_all_values:
+                    right_all_values.append(item)
+        elif event == 'sort_left':
+            left_all_values.sort()
+        elif event == 'sort_right':
+            right_all_values.sort()
+        elif event == '>':
             # Add left selected items to right listbox
             for item in left_selected:
                 left_all_values.remove(item)
@@ -154,10 +217,27 @@ def select_files_gui():
 
 
 def repo_splitter_gui():
-    config = repo_select_gui()
+
+    ### TEMP, for testing
+    defaults = dict(
+        repo_loc_url='https://github.com/nickderobertis/dero.git',
+        new_repo_name='testme',
+        gh_token=''
+    )
+    config = repo_select_gui(defaults)
+    ### END TEMP
+    ### TEMP COMMENTED
+    # config = repo_select_gui()
+    #### END TEMP COMMENTED
+
+
     if not config:
         return
-    select_files_gui()
+    with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
+        repo = clone_repo(config.repo, repo_temp_dest, all_branches=config.all_branches)
+        delete_remote(repo)
+        files = get_all_repo_files(repo)
+        select_files_gui(files, repo)
 
 if __name__ == "__main__":
     repo_splitter_gui()
