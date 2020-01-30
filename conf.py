@@ -49,8 +49,17 @@ PACKAGE_INSTALL_REQUIRES = [
     # 'otherpackage>=1,<2'
     'fire',
     'gitpython',
-    'PyGithub'
+    'PyGithub',
+    'PySimpleGUI',
+    'appdirs',
 ]
+
+# Add any third party packages you use in requirements for optional features of your package here
+# Keys should be name of the optional feature and values are lists of required packages
+# E.g. {'feature1': ['pandas', 'numpy'], 'feature2': ['matplotlib']}
+OPTIONAL_PACKAGE_INSTALL_REQUIRES = {
+    {'Qt': ['PySimpleGuiQt']}
+}
 
 # Sphinx executes all the import statements as it generates the documentation. To avoid having to install all
 # the necessary packages, third-party packages can be passed to mock imports to just skip the import.
