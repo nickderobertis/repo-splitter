@@ -41,6 +41,10 @@ class MustProvideOnlyOneRepoException(Exception):
     pass
 
 
+class MustDoSomethingException(Exception):
+    pass
+
+
 @dataclass
 class SelectRepoConfig:
     new_repo_name: str
@@ -51,6 +55,7 @@ class SelectRepoConfig:
     all_branches: Optional[bool] = False
     include_tags: Optional[bool] = False
     remove_files_from_old_repo: Optional[bool] = True
+    create_new_repo: Optional[bool] = True
 
     def __post_init__(self):
         print(self)
@@ -65,12 +70,18 @@ class SelectRepoConfig:
             if not getattr(self, inp_key):
                 raise MustProvideInputException(input_name=inp_name)
         self._validate_repo()
+        self._validate_options()
 
     def _validate_repo(self):
         if not self.repo_url and not self.repo_local_path:
             raise MustProvideRepoException
         if self.repo_url and self.repo_local_path:
             raise MustProvideOnlyOneRepoException
+
+    def _validate_options(self):
+        if not self.remove_files_from_old_repo and not self.create_new_repo:
+            raise MustDoSomethingException
+
 
     @property
     def repo_loc(self) -> str:
@@ -102,6 +113,7 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                 [sg.Text('Github Token:'), sg.InputText(key='gh_token', default_text=defaults['gh_token'])],
                 [sg.Checkbox('Split all branches', key='all_branches')],
                 [sg.Checkbox('Include tags in new repo', key='include_tags')],
+                [sg.Checkbox('Create new repo from selected files', key='create_new_repo', default=True)],
                 [sg.Checkbox('Remove history from the old repo', key='remove_files_from_old_repo', default=True)],
                 [sg.Button('Ok'), sg.Button('Cancel')] ]
 
@@ -121,7 +133,8 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                     repo_local_path=values['repo_loc_file_path'],
                     all_branches=values['all_branches'],
                     include_tags=values['include_tags'],
-                    remove_files_from_old_repo=values['remove_files_from_old_repo']
+                    remove_files_from_old_repo=values['remove_files_from_old_repo'],
+                    create_new_repo=values['create_new_repo']
                 )
                 break
             except MustProvideRepoException:
@@ -130,6 +143,9 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                 sg.Popup('Please provide only one of repo URL and local repo path')
             except MustProvideInputException as e:
                 sg.Popup(f'Please provide {e.input_name}')
+            except MustDoSomethingException:
+                sg.Popup(f'Must either create a new repo or remove history from old repo or both, '
+                         f'or else what are you trying to do?')
 
     window.close()
     return config
@@ -328,6 +344,8 @@ def repo_splitter_gui():
 
     if not config:
         return
+
+
     with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
         def clone_and_delete_remote():
             repo = clone_repo(config.repo_loc, repo_temp_dest, all_branches=config.all_branches)
@@ -341,60 +359,65 @@ def repo_splitter_gui():
         files = get_all_repo_files(repo)
         selected_files = select_files_gui(files, repo)
 
-        loading_gui(
-            _remove_history_except_for_files,
-            'Removing history from the temporary repo. This will take a long time '
-            'for large repos with many branches',
-            repo,
-            selected_files
-        )
+        if config.create_new_repo:
+            loading_gui(
+                _remove_history_except_for_files,
+                'Removing history from the temporary repo. This will take a long time '
+                'for large repos with many branches',
+                repo,
+                selected_files
+            )
 
-        github_repo = loading_gui(
-            _create_github_repo_connect_local_repo,
-            'Creating new Github repo',
-            repo,
-            config.new_repo_name,
-            config.gh_token,
-            all_branches=config.all_branches,
-            include_tags=config.include_tags
-        )
+            github_repo = loading_gui(
+                _create_github_repo_connect_local_repo,
+                'Creating new Github repo',
+                repo,
+                config.new_repo_name,
+                config.gh_token,
+                all_branches=config.all_branches,
+                include_tags=config.include_tags
+            )
 
         if not config.remove_files_from_old_repo:
             show_created_repo_gui(github_repo)
             exit(0)
 
-        with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
-            def make_backup_clone_old_repo():
-                # TODO: better handling for backup location
-                backup_dir = _set_backup_dir(None, os.getcwd())
-                backup_repo = clone_repo(config.repo_loc, backup_dir, all_branches=True)
-                repo = _clone_and_connect(config.repo_loc, repo_temp_dest, config.gh_token)
-                return repo
+    with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
+        def make_backup_clone_old_repo():
+            # TODO: better handling for backup location
+            backup_dir = _set_backup_dir(None, os.getcwd())
+            backup_repo = clone_repo(config.repo_loc, backup_dir, all_branches=True)
+            repo = _clone_and_connect(config.repo_loc, repo_temp_dest, config.gh_token)
+            return repo
 
-            old_repo = loading_gui(
-                make_backup_clone_old_repo,
-                f'Cloning old repo into a temporary directory {repo_temp_dest}',
+        old_repo = loading_gui(
+            make_backup_clone_old_repo,
+            f'Cloning old repo into a temporary directory {repo_temp_dest}',
+        )
+
+        to_remove_from_old = [file for file in files if file not in selected_files]
+
+        loading_gui(
+            _remove_history_except_for_files,
+            'Removing history from the temporary old repo. This will take a long time '
+            'for large repos with many branches. Note that nothing will be pushed to the remote '
+            'in this step.',
+            old_repo,
+            to_remove_from_old
+        )
+
+        should_push = should_push_old_repo_gui(repo_temp_dest)
+
+        if should_push:
+            push_all_force(old_repo)
+            dismiss_message_gui(
+                'Old repo pushed to remote. Please check it to make sure everything looks correct',
+                title='Successfully Pushed Old Repo'
             )
 
-            to_remove_from_old = [file for file in files if file not in selected_files]
+        if config.create_new_repo:
+            show_created_repo_gui(github_repo)
 
-            loading_gui(
-                _remove_history_except_for_files,
-                'Removing history from the temporary old repo. This will take a long time '
-                'for large repos with many branches. Note that nothing will be pushed to the remote '
-                'in this step.',
-                old_repo,
-                to_remove_from_old
-            )
-
-            should_push = should_push_old_repo_gui(repo_temp_dest)
-
-            if should_push:
-                push_all_force(old_repo)
-                dismiss_message_gui(
-                    'Old repo pushed to remote. Please check it to make sure everything looks correct',
-                    title='Successfully Pushed Old Repo'
-                )
 
 
 if __name__ == "__main__":
