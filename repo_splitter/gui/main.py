@@ -9,6 +9,7 @@ import webbrowser
 from git import Repo
 from github.Repository import Repository
 
+from repo_splitter.config import remove_github_token_from_config
 from repo_splitter.gui.config import sg, THEME
 from repo_splitter.git_tools.clone import clone_repo
 from repo_splitter.git_tools.history import _remove_history_except_for_files
@@ -54,6 +55,7 @@ class SelectRepoConfig:
     include_tags: Optional[bool] = False
     remove_files_from_old_repo: Optional[bool] = True
     create_new_repo: Optional[bool] = True
+    store_gh_token: Optional[bool] = True
 
     def __post_init__(self):
         print(self)
@@ -90,14 +92,17 @@ class SelectRepoConfig:
         raise MustProvideRepoException
 
 
-
 def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[SelectRepoConfig]:
+    expected_defaults = [
+        'repo_loc_url',
+        'new_repo_name',
+        'github_token',
+    ]
     if not defaults:
-        defaults = dict(
-            repo_loc_url='',
-            new_repo_name='',
-            gh_token=''
-        )
+        defaults = {}
+    for def_key in expected_defaults:
+        if def_key not in defaults:
+            defaults[def_key] = ''
 
     sg.theme(THEME)
 
@@ -108,11 +113,12 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                 [sg.Text('Repo by URL:'), sg.InputText(key='repo_loc_url', default_text=defaults['repo_loc_url'])],
                 [sg.Text('Local repo:'), sg.FolderBrowse(key='repo_loc_file_path')],
                 [sg.Text('New Repo Name:'), sg.InputText(key='new_repo_name', default_text=defaults['new_repo_name'])],
-                [sg.Text('Github Token:'), sg.InputText(key='gh_token', default_text=defaults['gh_token'])],
+                [sg.Text('Github Token:'), sg.InputText(key='gh_token', default_text=defaults['github_token'])],
                 [sg.Checkbox('Split all branches', key='all_branches')],
                 [sg.Checkbox('Include tags in new repo', key='include_tags')],
                 [sg.Checkbox('Create new repo from selected files', key='create_new_repo', default=True)],
                 [sg.Checkbox('Remove history from the old repo', key='remove_files_from_old_repo', default=True)],
+                [sg.Checkbox('Store Github Token for later use', key='store_gh_token', default=True)],
                 [sg.Button('Ok'), sg.Button('Cancel')] ]
 
     # Create the Window
@@ -132,7 +138,8 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                     all_branches=values['all_branches'],
                     include_tags=values['include_tags'],
                     remove_files_from_old_repo=values['remove_files_from_old_repo'],
-                    create_new_repo=values['create_new_repo']
+                    create_new_repo=values['create_new_repo'],
+                    store_gh_token=values['store_gh_token'],
                 )
                 break
             except MustProvideRepoException:
@@ -324,25 +331,30 @@ def show_created_repo_gui(gh_repo: Repository):
     window.close()
 
 
-def repo_splitter_gui():
-    from repo_splitter.__main__ import _create_github_repo_connect_local_repo, _set_backup_dir, _clone_and_connect
+def repo_splitter_gui(**defaults):
+    from repo_splitter.__main__ import (
+        _create_github_repo_connect_local_repo,
+        _set_backup_dir,
+        _clone_and_connect
+    )
+    from repo_splitter.config import store_github_token
 
     ### TEMP, for testing
-    defaults = dict(
+    defaults.update(dict(
         repo_loc_url='https://github.com/nickderobertis/dero.git',
         new_repo_name='testme',
-        gh_token=''
-    )
-    config = repo_select_gui(defaults)
+    ))
     ### END TEMP
-    ### TEMP COMMENTED
-    # config = repo_select_gui()
-    #### END TEMP COMMENTED
 
+    config = repo_select_gui(defaults)
 
     if not config:
         return
 
+    if config.store_gh_token:
+        store_github_token(config.gh_token)
+    else:
+        remove_github_token_from_config()
 
     with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
         def clone_and_delete_remote():

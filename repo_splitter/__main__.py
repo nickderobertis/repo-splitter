@@ -2,12 +2,14 @@ import sys
 import os
 import tempfile
 import time
+from functools import partial
 from typing import Sequence, Optional
 
 import fire
 from git import Repo
 from github.Repository import Repository
 
+from repo_splitter.config import store_github_token, get_github_token_from_config
 from repo_splitter.git_tools.clone import clone_repo
 from repo_splitter.git_tools.remote import delete_remote
 from repo_splitter.git_tools.history import remove_history_for_files_not_matching, remove_history_for_files_matching
@@ -187,6 +189,7 @@ def _clone_and_connect(repo_source: str, repo_temp_dest: str, github_token: str)
         connect_local_repo_to_github_repo(repo, github_repo, github_token)
     return repo
 
+
 def restore_from_backup(repo_source: str, repo_dest: str, github_token: str, backup_dir: Optional[str] = None):
     """
     Restores a repo to original after running split_repo or remove_from_repo_history
@@ -213,19 +216,37 @@ def restore_from_backup(repo_source: str, repo_dest: str, github_token: str, bac
     push_all_force(repo)
 
 
-
 def main():
+
+    gh_token = get_github_token_from_config()
+    if gh_token:
+        defaults = dict(github_token=gh_token)
+    else:
+        defaults = {}
+
     if len(sys.argv) == 1:
         # No sub-command passed, launch gui
-        return repo_splitter_gui()
+        return repo_splitter_gui(**defaults)
 
     # Arguments passed, go to CLI interface
 
-    return fire.Fire({
+    # Set defaults for CLI interface
+    configure_commands_dict = {
         'split': split_repo,
         'rmhist': remove_from_repo_history,
         'restore': restore_from_backup,
+    }
+    commands_dict = {}
+
+    for cli_key, func in configure_commands_dict.items():
+        commands_dict[cli_key] = partial(func, **defaults)
+
+    # Add commands which do not take defaults
+    commands_dict.update({
+        'configure': store_github_token
     })
+
+    return fire.Fire(commands_dict)
 
 
 if __name__ == '__main__':
