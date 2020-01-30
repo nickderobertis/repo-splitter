@@ -1,0 +1,54 @@
+repo\_splitter.gui package
+==========================
+
+Submodules
+----------
+
+repo\_splitter.gui.config module
+--------------------------------
+
+.. automodule:: repo_splitter.gui.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.gui.error module
+-------------------------------
+
+.. automodule:: repo_splitter.gui.error
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.gui.loading module
+---------------------------------
+
+.. automodule:: repo_splitter.gui.loading
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.gui.main module
+------------------------------
+
+.. automodule:: repo_splitter.gui.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+repo\_splitter.gui.temp module
+------------------------------
+
+.. automodule:: repo_splitter.gui.temp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: repo_splitter.gui
+   :members:
+   :undoc-members:
+   :show-inheritance:

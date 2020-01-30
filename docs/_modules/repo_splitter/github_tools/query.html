@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.github_tools.query &#8212; repo_splitter 0.3.1 documentation</title>
+    <title>repo_splitter.github_tools.query &#8212; repo_splitter 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
@@ -32,8 +32,8 @@
           <div class="body" role="main">
             
   <h1>Source code for repo_splitter.github_tools.query</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">github</span> <span class="k">import</span> <span class="n">Github</span>
-<span class="kn">from</span> <span class="nn">github.Repository</span> <span class="k">import</span> <span class="n">Repository</span>
+<span></span><span class="kn">from</span> <span class="nn">github</span> <span class="kn">import</span> <span class="n">Github</span>
+<span class="kn">from</span> <span class="nn">github.Repository</span> <span class="kn">import</span> <span class="n">Repository</span>
 
 
 <div class="viewcode-block" id="github_repo_from_clone_url"><a class="viewcode-back" href="../../../api/repo_splitter.github_tools.html#repo_splitter.github_tools.query.github_repo_from_clone_url">[docs]</a><span class="k">def</span> <span class="nf">github_repo_from_clone_url</span><span class="p">(</span><span class="n">clone_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Repository</span><span class="p">:</span>
@@ -46,8 +46,8 @@
             <span class="k">break</span>
 
     <span class="k">if</span> <span class="n">repo_result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">NoSuchGithubRepositoryException</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;could not find a Github repository for this user matching &#39;</span>
-                                              <span class="n">f</span><span class="s1">&#39;the clone url </span><span class="si">{clone_url}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">NoSuchGithubRepositoryException</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;could not find a Github repository for this user matching &#39;</span>
+                                              <span class="sa">f</span><span class="s1">&#39;the clone url </span><span class="si">{clone_url}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">repo_result</span></div>
 
@@ -96,7 +96,7 @@
       &copy;2020, Nick DeRobertis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

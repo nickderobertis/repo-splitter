@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.github_tools.connect &#8212; repo_splitter 0.3.1 documentation</title>
+    <title>repo_splitter.github_tools.connect &#8212; repo_splitter 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
@@ -32,9 +32,9 @@
           <div class="body" role="main">
             
   <h1>Source code for repo_splitter.github_tools.connect</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">git</span> <span class="k">import</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">Remote</span>
-<span class="kn">from</span> <span class="nn">github.Repository</span> <span class="k">import</span> <span class="n">Repository</span>
-<span class="kn">from</span> <span class="nn">github</span> <span class="k">import</span> <span class="n">Github</span>
+<span></span><span class="kn">from</span> <span class="nn">git</span> <span class="kn">import</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">Remote</span>
+<span class="kn">from</span> <span class="nn">github.Repository</span> <span class="kn">import</span> <span class="n">Repository</span>
+<span class="kn">from</span> <span class="nn">github</span> <span class="kn">import</span> <span class="n">Github</span>
 
 
 <div class="viewcode-block" id="connect_local_repo_to_github_repo"><a class="viewcode-back" href="../../../api/repo_splitter.github_tools.html#repo_splitter.github_tools.connect.connect_local_repo_to_github_repo">[docs]</a><span class="k">def</span> <span class="nf">connect_local_repo_to_github_repo</span><span class="p">(</span><span class="n">local_repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">github_repo</span><span class="p">:</span> <span class="n">Repository</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Remote</span><span class="p">:</span>
@@ -45,7 +45,7 @@
 
 <span class="k">def</span> <span class="nf">_github_authenticated_url</span><span class="p">(</span><span class="n">github_repo</span><span class="p">:</span> <span class="n">Repository</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">username</span> <span class="o">=</span> <span class="n">_username_from_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">github_repo</span><span class="o">.</span><span class="n">clone_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{username}</span><span class="s1">:</span><span class="si">{token}</span><span class="s1">@github.com&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">github_repo</span><span class="o">.</span><span class="n">clone_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{username}</span><span class="s1">:</span><span class="si">{token}</span><span class="s1">@github.com&#39;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_username_from_token</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -95,7 +95,7 @@
       &copy;2020, Nick DeRobertis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

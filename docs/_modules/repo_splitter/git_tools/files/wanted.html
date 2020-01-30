@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.files.wanted &#8212; repo_splitter 0.3.1 documentation</title>
+    <title>repo_splitter.git_tools.files.wanted &#8212; repo_splitter 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_paramlinks.css" />
@@ -33,12 +33,12 @@
             
   <h1>Source code for repo_splitter.git_tools.files.wanted</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 
-<span class="kn">from</span> <span class="nn">git</span> <span class="k">import</span> <span class="n">Repo</span>
+<span class="kn">from</span> <span class="nn">git</span> <span class="kn">import</span> <span class="n">Repo</span>
 
-<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.renames</span> <span class="k">import</span> <span class="n">all_file_names_which_have_contained_the_lines_in_multiple_files</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.renames</span> <span class="kn">import</span> <span class="n">all_file_names_which_have_contained_the_lines_in_multiple_files</span>
 
 
 <div class="viewcode-block" id="get_desired_files_from_patterns"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.wanted.get_desired_files_from_patterns">[docs]</a><span class="k">def</span> <span class="nf">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -54,6 +54,7 @@
 <span class="sd">    :param follow_renames: Whether to track previous names of files from the history and also include those</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: needs to handle passing patterns which match old files not in the current working directory</span>
     <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">working_tree_dir</span><span class="p">)</span>
     <span class="n">all_files</span> <span class="o">=</span> <span class="p">[]</span>
@@ -62,10 +63,10 @@
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">current_dir</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">follow_renames</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Following renames for </span><span class="si">{all_files}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Following renames for </span><span class="si">{all_files}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">all_files_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_files</span><span class="p">)</span>
         <span class="n">new_files</span> <span class="o">=</span> <span class="n">all_file_names_which_have_contained_the_lines_in_multiple_files</span><span class="p">(</span><span class="n">all_files</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;After tracking renames, added {new_files.difference(all_files_set)} to file list.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;After tracking renames, added {new_files.difference(all_files_set)} to file list.&#39;</span><span class="p">)</span>
         <span class="n">all_files_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_files</span><span class="p">)</span>
         <span class="n">all_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_files_set</span><span class="p">)</span>
 
@@ -112,7 +113,7 @@
       &copy;2020, Nick DeRobertis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
