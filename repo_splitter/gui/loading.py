@@ -11,12 +11,17 @@ from repo_splitter.gui.error import error_window
 
 @dataclass
 class Result:
+    success: Optional[bool] = None
     value: Optional[Any] = None
     exception: Optional[TracebackException] = None
 
     @property
     def empty(self) -> bool:
-        return self.value is None and self.exception is None
+        return self.value is None and self.exception is None and self.success is None
+
+    @property
+    def was_successful(self) -> bool:
+        return self.success is not None and self.success
 
 
 def run_put_result_in_queue(func: Callable, gui_queue: queue.Queue, *args, **kwargs):
@@ -29,11 +34,11 @@ def run_put_result_in_queue(func: Callable, gui_queue: queue.Queue, *args, **kwa
     """
     try:
         value = func(*args, **kwargs)
-        result = Result(value=value)
+        result = Result(True, value=value)
         gui_queue.put(result)  # put a message into queue for GUI
     except Exception as e:
         te = TracebackException.from_exception(e)
-        result = Result(exception=te)
+        result = Result(False, exception=te)
         gui_queue.put(result)
         raise e
 
