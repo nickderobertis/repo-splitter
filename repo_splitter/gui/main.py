@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional, List, Dict, Any, Callable
+from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 import tempfile
 import os
@@ -9,7 +9,7 @@ import webbrowser
 from git import Repo
 from github.Repository import Repository
 
-from repo_splitter.gui.config import sg
+from repo_splitter.gui.config import sg, THEME
 from repo_splitter.git_tools.clone import clone_repo
 from repo_splitter.git_tools.history import _remove_history_except_for_files
 from repo_splitter.git_tools.push import push_all_force
@@ -22,8 +22,6 @@ FILES_LISTBOX_SETTINGS = dict(
     size=(50, 20),
     select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED
 )
-
-THEME = 'DarkAmber'
 
 
 class MustProvideInputException(Exception):
