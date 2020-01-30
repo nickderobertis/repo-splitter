@@ -20,6 +20,10 @@ download::
 Usage
 =========
 
+To use the GUI, simply type::
+
+    repo-splitter
+
 For an overview of the CLI commands, do::
 
     repo-splitter --help
