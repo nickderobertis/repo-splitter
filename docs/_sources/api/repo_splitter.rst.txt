@@ -8,6 +8,19 @@ Subpackages
 
    repo_splitter.git_tools
    repo_splitter.github_tools
+   repo_splitter.gui
+
+Submodules
+----------
+
+repo\_splitter.config module
+----------------------------
+
+.. automodule:: repo_splitter.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Module contents
 ---------------

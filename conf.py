@@ -5,10 +5,10 @@
 PACKAGE_NAME = 'repo_splitter'
 
 # Package version in the format (major, minor, release)
-PACKAGE_VERSION_TUPLE = (0, 3, 1)
+PACKAGE_VERSION_TUPLE = (0, 4, 0)
 
 # Short description of the package
-PACKAGE_SHORT_DESCRIPTION = 'A CLI tool to split a part of a git repo into another git repo, separating the history'
+PACKAGE_SHORT_DESCRIPTION = 'A GUI and CLI tool to split a part of a git repo into another git repo, separating the history'
 
 # Long description of the package
 PACKAGE_DESCRIPTION = """
@@ -49,8 +49,17 @@ PACKAGE_INSTALL_REQUIRES = [
     # 'otherpackage>=1,<2'
     'fire',
     'gitpython',
-    'PyGithub'
+    'PyGithub',
+    'PySimpleGUI',
+    'appdirs',
 ]
+
+# Add any third party packages you use in requirements for optional features of your package here
+# Keys should be name of the optional feature and values are lists of required packages
+# E.g. {'feature1': ['pandas', 'numpy'], 'feature2': ['matplotlib']}
+OPTIONAL_PACKAGE_INSTALL_REQUIRES = {
+    'Qt': ['PySimpleGuiQt']
+}
 
 # Sphinx executes all the import statements as it generates the documentation. To avoid having to install all
 # the necessary packages, third-party packages can be passed to mock imports to just skip the import.

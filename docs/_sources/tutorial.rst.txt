@@ -10,8 +10,19 @@ Install via::
 
     pip install repo_splitter
 
+
+To get more modern styling of the GUI, you can add Qt. Note that
+if you do not already have it installed, this will be a large
+download::
+
+    pip install repo_splitter[Qt]
+
 Usage
 =========
+
+To use the GUI, simply type::
+
+    repo-splitter
 
 For an overview of the CLI commands, do::
 

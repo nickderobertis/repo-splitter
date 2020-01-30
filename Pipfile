@@ -16,6 +16,9 @@ fire = "*"
 gitpython = "*"
 PyGithub = "*"
 jupyterlab = "*"
+pysimplegui = "*"
+pysimpleguiqt = "*"
+appdirs = "*"
 
 [requires]
 python_version = "3.7"

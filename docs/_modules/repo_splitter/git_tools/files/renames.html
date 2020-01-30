@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.git_tools.files.renames &#8212; repo_splitter 0.3.1 documentation</title>
+    <title>repo_splitter.git_tools.files.renames &#8212; repo_splitter 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_paramlinks.css" />
@@ -34,9 +34,9 @@
   <h1>Source code for repo_splitter.git_tools.files.renames</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Sequence</span>
 
-<span class="kn">from</span> <span class="nn">git</span> <span class="k">import</span> <span class="n">Repo</span>
+<span class="kn">from</span> <span class="nn">git</span> <span class="kn">import</span> <span class="n">Repo</span>
 
 
 <div class="viewcode-block" id="all_file_names_which_have_contained_the_lines_in_multiple_files"><a class="viewcode-back" href="../../../../api/repo_splitter.git_tools.files.html#repo_splitter.git_tools.files.renames.all_file_names_which_have_contained_the_lines_in_multiple_files">[docs]</a><span class="k">def</span> <span class="nf">all_file_names_which_have_contained_the_lines_in_multiple_files</span><span class="p">(</span><span class="n">file_paths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -90,7 +90,7 @@
     <span class="n">num_lines</span> <span class="o">=</span> <span class="n">file_length</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">num_lines</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">EmptyFileException</span><span class="p">(</span><span class="s1">&#39;could not track history of lines in an empty file&#39;</span><span class="p">)</span>
-    <span class="n">file_search_str</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;1,</span><span class="si">{num_lines}</span><span class="s1">:</span><span class="si">{file_path}</span><span class="s1">&#39;</span>
+    <span class="n">file_search_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;1,</span><span class="si">{num_lines}</span><span class="s1">:</span><span class="si">{file_path}</span><span class="s1">&#39;</span>
     <span class="n">log</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;--format=oneline&#39;</span><span class="p">,</span> <span class="s1">&#39;--compact-summary&#39;</span><span class="p">,</span> <span class="s1">&#39;-L&#39;</span><span class="p">,</span> <span class="n">file_search_str</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">log</span></div>
 
@@ -162,7 +162,7 @@
       &copy;2020, Nick DeRobertis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

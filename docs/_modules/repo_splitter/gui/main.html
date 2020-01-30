@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>repo_splitter.gui.main &#8212; repo_splitter 0.4.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for repo_splitter.gui.main</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+
+
+<span class="kn">from</span> <span class="nn">git</span> <span class="kn">import</span> <span class="n">Repo</span>
+<span class="kn">from</span> <span class="nn">github.Repository</span> <span class="kn">import</span> <span class="n">Repository</span>
+
+<span class="kn">from</span> <span class="nn">repo_splitter.config</span> <span class="kn">import</span> <span class="n">remove_github_token_from_config</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.gui.config</span> <span class="kn">import</span> <span class="n">sg</span><span class="p">,</span> <span class="n">THEME</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.clone</span> <span class="kn">import</span> <span class="n">clone_repo</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.history</span> <span class="kn">import</span> <span class="n">_remove_history_except_for_files</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.push</span> <span class="kn">import</span> <span class="n">push_all_force</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.remote</span> <span class="kn">import</span> <span class="n">delete_remote</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.all</span> <span class="kn">import</span> <span class="n">get_all_repo_files</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.git_tools.files.wanted</span> <span class="kn">import</span> <span class="n">get_desired_files_from_patterns</span>
+<span class="kn">from</span> <span class="nn">repo_splitter.gui.loading</span> <span class="kn">import</span> <span class="n">loading_gui</span>
+
+<span class="n">FILES_LISTBOX_SETTINGS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="n">select_mode</span><span class="o">=</span><span class="n">sg</span><span class="o">.</span><span class="n">LISTBOX_SELECT_MODE_EXTENDED</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="MustProvideInputException"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.MustProvideInputException">[docs]</a><span class="k">class</span> <span class="nc">MustProvideInputException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MustProvideInputException.__init__"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.MustProvideInputException.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_name</span> <span class="o">=</span> <span class="n">input_name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MustProvideRepoException"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.MustProvideRepoException">[docs]</a><span class="k">class</span> <span class="nc">MustProvideRepoException</span><span class="p">(</span><span class="n">MustProvideInputException</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="MustProvideOnlyOneRepoException"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.MustProvideOnlyOneRepoException">[docs]</a><span class="k">class</span> <span class="nc">MustProvideOnlyOneRepoException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="MustDoSomethingException"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.MustDoSomethingException">[docs]</a><span class="k">class</span> <span class="nc">MustDoSomethingException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SelectRepoConfig"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.SelectRepoConfig">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SelectRepoConfig</span><span class="p">:</span>
+    <span class="n">new_repo_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">gh_token</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">repo_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">repo_local_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">all_branches</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">include_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">remove_files_from_old_repo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">create_new_repo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">store_gh_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">required_inputs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;new_repo_name&#39;</span><span class="p">:</span> <span class="s1">&#39;New Repo Name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;gh_token&#39;</span><span class="p">:</span> <span class="s1">&#39;Github Token&#39;</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">inp_key</span><span class="p">,</span> <span class="n">inp_name</span> <span class="ow">in</span> <span class="n">required_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp_key</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">MustProvideInputException</span><span class="p">(</span><span class="n">input_name</span><span class="o">=</span><span class="n">inp_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_repo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_options</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_validate_repo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_url</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_local_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MustProvideRepoException</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_url</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_local_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MustProvideOnlyOneRepoException</span>
+
+    <span class="k">def</span> <span class="nf">_validate_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_files_from_old_repo</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_new_repo</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MustDoSomethingException</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">repo_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_url</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_url</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_local_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_local_path</span>
+        <span class="k">raise</span> <span class="n">MustProvideRepoException</span></div>
+
+
+<div class="viewcode-block" id="repo_select_gui"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.repo_select_gui">[docs]</a><span class="k">def</span> <span class="nf">repo_select_gui</span><span class="p">(</span><span class="n">defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SelectRepoConfig</span><span class="p">]:</span>
+    <span class="n">expected_defaults</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;repo_loc_url&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;new_repo_name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;github_token&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">defaults</span><span class="p">:</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">def_key</span> <span class="ow">in</span> <span class="n">expected_defaults</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">def_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="n">def_key</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="n">sg</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="n">THEME</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SelectRepoConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># All the stuff inside your window.</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="p">[</span>  <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Please select either a remote repo by URL or a local repo.&#39;</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Repo by URL:&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">InputText</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;repo_loc_url&#39;</span><span class="p">,</span> <span class="n">default_text</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;repo_loc_url&#39;</span><span class="p">])],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Local repo:&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">FolderBrowse</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;repo_loc_file_path&#39;</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;New Repo Name:&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">InputText</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;new_repo_name&#39;</span><span class="p">,</span> <span class="n">default_text</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;new_repo_name&#39;</span><span class="p">])],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Github Token:&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">InputText</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;gh_token&#39;</span><span class="p">,</span> <span class="n">default_text</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;github_token&#39;</span><span class="p">])],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="s1">&#39;Split all branches&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;all_branches&#39;</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="s1">&#39;Include tags in new repo&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;include_tags&#39;</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="s1">&#39;Create new repo from selected files&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;create_new_repo&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="s1">&#39;Remove history from the old repo&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;remove_files_from_old_repo&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="s1">&#39;Store Github Token for later use&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;store_gh_token&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Ok&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Cancel&#39;</span><span class="p">)]</span> <span class="p">]</span>
+
+    <span class="c1"># Create the Window</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Window</span><span class="p">(</span><span class="s1">&#39;Repo Splitter - Select Repo&#39;</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="c1"># Event Loop to process &quot;events&quot; and get the &quot;values&quot; of the inputs</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">event</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">):</span>   <span class="c1"># if user closes window or clicks cancel</span>
+            <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;Ok&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="n">SelectRepoConfig</span><span class="p">(</span>
+                    <span class="n">values</span><span class="p">[</span><span class="s1">&#39;new_repo_name&#39;</span><span class="p">],</span>
+                    <span class="n">values</span><span class="p">[</span><span class="s1">&#39;gh_token&#39;</span><span class="p">],</span>
+                    <span class="n">repo_url</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;repo_loc_url&#39;</span><span class="p">],</span>
+                    <span class="n">repo_local_path</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;repo_loc_file_path&#39;</span><span class="p">],</span>
+                    <span class="n">all_branches</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;all_branches&#39;</span><span class="p">],</span>
+                    <span class="n">include_tags</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;include_tags&#39;</span><span class="p">],</span>
+                    <span class="n">remove_files_from_old_repo</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;remove_files_from_old_repo&#39;</span><span class="p">],</span>
+                    <span class="n">create_new_repo</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;create_new_repo&#39;</span><span class="p">],</span>
+                    <span class="n">store_gh_token</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;store_gh_token&#39;</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="n">MustProvideRepoException</span><span class="p">:</span>
+                <span class="n">sg</span><span class="o">.</span><span class="n">Popup</span><span class="p">(</span><span class="s1">&#39;Please provide either a repo URL or local repo path&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MustProvideOnlyOneRepoException</span><span class="p">:</span>
+                <span class="n">sg</span><span class="o">.</span><span class="n">Popup</span><span class="p">(</span><span class="s1">&#39;Please provide only one of repo URL and local repo path&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MustProvideInputException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">sg</span><span class="o">.</span><span class="n">Popup</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Please provide </span><span class="si">{e.input_name}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MustDoSomethingException</span><span class="p">:</span>
+                <span class="n">sg</span><span class="o">.</span><span class="n">Popup</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Must either create a new repo or remove history from old repo or both, &#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;or else what are you trying to do?&#39;</span><span class="p">)</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">config</span></div>
+
+
+<div class="viewcode-block" id="select_files_gui"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.select_files_gui">[docs]</a><span class="k">def</span> <span class="nf">select_files_gui</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">repo</span><span class="p">:</span> <span class="n">Repo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">sg</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="n">THEME</span><span class="p">)</span>
+
+    <span class="n">orig_to_select</span> <span class="o">=</span> <span class="n">files</span>
+    <span class="n">orig_selected</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_items</span> <span class="o">=</span> <span class="n">orig_to_select</span> <span class="o">+</span> <span class="n">orig_selected</span>
+
+    <span class="c1"># All the stuff inside your window.</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="p">[</span>  <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Please select which files should be split from the repo.&#39;</span><span class="p">)],</span>
+                <span class="p">[</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Enter a glob pattern:&#39;</span><span class="p">),</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">InputText</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;file_pattern&#39;</span><span class="p">),</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="s1">&#39;Include renames&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;include_renames&#39;</span><span class="p">),</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Match&#39;</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="p">[</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Don&#39;t Split&quot;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Sort&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;sort_left&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Listbox</span><span class="p">(</span><span class="n">orig_to_select</span><span class="p">,</span> <span class="o">**</span><span class="n">FILES_LISTBOX_SETTINGS</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;files_to_select&#39;</span><span class="p">)],</span>
+                    <span class="p">]),</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;&#39;</span><span class="p">)],</span>
+                    <span class="p">]),</span>
+                    <span class="n">sg</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Split&quot;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Sort&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;sort_right&#39;</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Listbox</span><span class="p">(</span><span class="n">orig_selected</span><span class="p">,</span> <span class="o">**</span><span class="n">FILES_LISTBOX_SETTINGS</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;files_selected&#39;</span><span class="p">)],</span>
+                    <span class="p">]),</span>
+
+                <span class="p">],</span>
+                <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Ok&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Cancel&#39;</span><span class="p">)]</span> <span class="p">]</span>
+
+    <span class="c1"># Create the Window</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Window</span><span class="p">(</span><span class="s1">&#39;Repo Splitter - Select Files&#39;</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="c1"># Event Loop to process &quot;events&quot; and get the &quot;values&quot; of the inputs</span>
+    <span class="n">exit_on_close</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">event</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">):</span>   <span class="c1"># if user closes window or clicks cancel</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;Ok&#39;</span><span class="p">:</span>
+            <span class="n">exit_on_close</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">break</span>
+        <span class="n">left_selected</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;files_to_select&#39;</span><span class="p">])</span>
+        <span class="n">right_selected</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;files_selected&#39;</span><span class="p">])</span>
+        <span class="n">left_listbox</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="s1">&#39;files_to_select&#39;</span><span class="p">]</span>
+        <span class="n">right_listbox</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="s1">&#39;files_selected&#39;</span><span class="p">]</span>
+        <span class="n">left_all_values</span> <span class="o">=</span> <span class="n">left_listbox</span><span class="o">.</span><span class="n">Values</span>
+        <span class="n">right_all_values</span> <span class="o">=</span> <span class="n">right_listbox</span><span class="o">.</span><span class="n">Values</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;Match&#39;</span><span class="p">:</span>
+            <span class="c1"># Handle glob match to move files to right</span>
+            <span class="n">file_pattern</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;file_pattern&#39;</span><span class="p">]</span>
+            <span class="n">include_renames</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;include_renames&#39;</span><span class="p">]</span>
+            <span class="n">matched_files</span> <span class="o">=</span> <span class="n">get_desired_files_from_patterns</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="p">[</span><span class="n">file_pattern</span><span class="p">],</span> <span class="n">follow_renames</span><span class="o">=</span><span class="n">include_renames</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">matched_files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">left_all_values</span><span class="p">:</span>
+                    <span class="n">left_all_values</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">all_items</span> <span class="ow">and</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">right_all_values</span><span class="p">:</span>
+                    <span class="n">right_all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;sort_left&#39;</span><span class="p">:</span>
+            <span class="n">left_all_values</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;sort_right&#39;</span><span class="p">:</span>
+            <span class="n">right_all_values</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span>
+            <span class="c1"># Add left selected items to right listbox</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">left_selected</span><span class="p">:</span>
+                <span class="n">left_all_values</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">right_all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span>
+            <span class="c1"># Add right selected items to left listbox</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">right_selected</span><span class="p">:</span>
+                <span class="n">left_all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">right_all_values</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;&gt;&gt;&#39;</span><span class="p">:</span>
+            <span class="c1"># Add all left items to right listbox</span>
+            <span class="n">left_all_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">right_all_values</span> <span class="o">=</span> <span class="n">all_items</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;&lt;&lt;&#39;</span><span class="p">:</span>
+            <span class="c1"># Add all right items to left listbox</span>
+            <span class="n">left_all_values</span> <span class="o">=</span> <span class="n">all_items</span>
+            <span class="n">right_all_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">left_listbox</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">left_all_values</span><span class="p">)</span>
+        <span class="n">right_listbox</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">right_all_values</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;values: &#39;</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;event: &#39;</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;left listbox&#39;</span><span class="p">,</span> <span class="n">left_listbox</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;right listbox&#39;</span><span class="p">,</span> <span class="n">right_listbox</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+
+    <span class="n">right_listbox</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="s1">&#39;files_selected&#39;</span><span class="p">]</span>
+    <span class="n">final_selected_values</span> <span class="o">=</span> <span class="n">right_listbox</span><span class="o">.</span><span class="n">Values</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">exit_on_close</span><span class="p">:</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">final_selected_values</span></div>
+
+
+<div class="viewcode-block" id="dismiss_message_gui"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.dismiss_message_gui">[docs]</a><span class="k">def</span> <span class="nf">dismiss_message_gui</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Notice&#39;</span><span class="p">):</span>
+    <span class="n">sg</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="n">THEME</span><span class="p">)</span>
+
+    <span class="c1"># All the stuff inside your window.</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="p">[[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">message</span><span class="p">)],</span>
+              <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Ok&#39;</span><span class="p">)]]</span>
+
+    <span class="c1"># Create the Window</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Window</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="c1"># Event Loop to process &quot;events&quot; and get the &quot;values&quot; of the inputs</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">event</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">):</span>  <span class="c1"># if user closes window or clicks cancel</span>
+            <span class="k">break</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="should_push_old_repo_gui"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.should_push_old_repo_gui">[docs]</a><span class="k">def</span> <span class="nf">should_push_old_repo_gui</span><span class="p">(</span><span class="n">temp_repo_dest</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">sg</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="n">THEME</span><span class="p">)</span>
+
+    <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">The old repo has the history removed in a temporary repo in </span><span class="si">{temp_repo_dest}</span><span class="s2">. Please examine </span>
+<span class="s2">the history in detail. If everything looks correct, click &quot;Remove History&quot; to remove the </span>
+<span class="s2">history from the old repo. This will overwrite the existing remote repo. If there is some issue</span>
+<span class="s2">or you do not want to push the overwritten history, press &quot;Cancel&quot;.</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># All the stuff inside your window.</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="p">[[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">message</span><span class="p">)],</span>
+              <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Remove History&#39;</span><span class="p">),</span> <span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Cancel&#39;</span><span class="p">)]]</span>
+
+    <span class="c1"># Create the Window</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Window</span><span class="p">(</span><span class="s1">&#39;Successfully Removed History From Old Repo. Push it?&#39;</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="c1"># Event Loop to process &quot;events&quot; and get the &quot;values&quot; of the inputs</span>
+    <span class="n">push_history</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">event</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">):</span>  <span class="c1"># if user closes window or clicks cancel</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;Remove History&#39;</span><span class="p">:</span>
+            <span class="n">push_history</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">push_history</span></div>
+
+
+<div class="viewcode-block" id="show_created_repo_gui"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.show_created_repo_gui">[docs]</a><span class="k">def</span> <span class="nf">show_created_repo_gui</span><span class="p">(</span><span class="n">gh_repo</span><span class="p">:</span> <span class="n">Repository</span><span class="p">):</span>
+    <span class="n">sg</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="n">THEME</span><span class="p">)</span>
+
+    <span class="c1"># All the stuff inside your window.</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="p">[[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The new repo </span><span class="si">{gh_repo.name}</span><span class="s1"> is now available. Click the following link to view:&#39;</span><span class="p">)],</span>
+              <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">gh_repo</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">click_submits</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text_color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;url_clicked&#39;</span><span class="p">)],</span>
+              <span class="p">[</span><span class="n">sg</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Ok&#39;</span><span class="p">)]]</span>
+
+    <span class="c1"># Create the Window</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Window</span><span class="p">(</span><span class="s1">&#39;Successfully Created New Repo&#39;</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="c1"># Event Loop to process &quot;events&quot; and get the &quot;values&quot; of the inputs</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">event</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">):</span>  <span class="c1"># if user closes window or clicks cancel</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;url_clicked&#39;</span><span class="p">:</span>
+            <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">gh_repo</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+
+
+    <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="repo_splitter_gui"><a class="viewcode-back" href="../../../api/repo_splitter.gui.html#repo_splitter.gui.main.repo_splitter_gui">[docs]</a><span class="k">def</span> <span class="nf">repo_splitter_gui</span><span class="p">(</span><span class="o">**</span><span class="n">defaults</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">repo_splitter.__main__</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">_create_github_repo_connect_local_repo</span><span class="p">,</span>
+        <span class="n">_set_backup_dir</span><span class="p">,</span>
+        <span class="n">_clone_and_connect</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">repo_splitter.config</span> <span class="kn">import</span> <span class="n">store_github_token</span>
+
+    <span class="c1">### TEMP, for testing</span>
+    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">repo_loc_url</span><span class="o">=</span><span class="s1">&#39;https://github.com/nickderobertis/dero.git&#39;</span><span class="p">,</span>
+        <span class="n">new_repo_name</span><span class="o">=</span><span class="s1">&#39;testme&#39;</span><span class="p">,</span>
+    <span class="p">))</span>
+    <span class="c1">### END TEMP</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="n">repo_select_gui</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">store_gh_token</span><span class="p">:</span>
+        <span class="n">store_github_token</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">gh_token</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">remove_github_token_from_config</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">repo_temp_dest</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">clone_and_delete_remote</span><span class="p">():</span>
+            <span class="n">repo</span> <span class="o">=</span> <span class="n">clone_repo</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">repo_loc</span><span class="p">,</span> <span class="n">repo_temp_dest</span><span class="p">,</span> <span class="n">all_branches</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">all_branches</span><span class="p">)</span>
+            <span class="n">delete_remote</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">repo</span>
+
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">loading_gui</span><span class="p">(</span>
+            <span class="n">clone_and_delete_remote</span><span class="p">,</span>
+            <span class="s1">&#39;Cloning the repo. This may take a long time for larger repos.&#39;</span>
+        <span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">get_all_repo_files</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+        <span class="n">selected_files</span> <span class="o">=</span> <span class="n">select_files_gui</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">create_new_repo</span><span class="p">:</span>
+            <span class="n">loading_gui</span><span class="p">(</span>
+                <span class="n">_remove_history_except_for_files</span><span class="p">,</span>
+                <span class="s1">&#39;Removing history from the temporary repo. This will take a long time &#39;</span>
+                <span class="s1">&#39;for large repos with many branches&#39;</span><span class="p">,</span>
+                <span class="n">repo</span><span class="p">,</span>
+                <span class="n">selected_files</span>
+            <span class="p">)</span>
+
+            <span class="n">github_repo</span> <span class="o">=</span> <span class="n">loading_gui</span><span class="p">(</span>
+                <span class="n">_create_github_repo_connect_local_repo</span><span class="p">,</span>
+                <span class="s1">&#39;Creating new Github repo&#39;</span><span class="p">,</span>
+                <span class="n">repo</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">new_repo_name</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">gh_token</span><span class="p">,</span>
+                <span class="n">all_branches</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">all_branches</span><span class="p">,</span>
+                <span class="n">include_tags</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">include_tags</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">remove_files_from_old_repo</span><span class="p">:</span>
+            <span class="n">show_created_repo_gui</span><span class="p">(</span><span class="n">github_repo</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">repo_temp_dest</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">make_backup_clone_old_repo</span><span class="p">():</span>
+            <span class="c1"># TODO: better handling for backup location</span>
+            <span class="n">backup_dir</span> <span class="o">=</span> <span class="n">_set_backup_dir</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+            <span class="n">backup_repo</span> <span class="o">=</span> <span class="n">clone_repo</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">repo_loc</span><span class="p">,</span> <span class="n">backup_dir</span><span class="p">,</span> <span class="n">all_branches</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">repo</span> <span class="o">=</span> <span class="n">_clone_and_connect</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">repo_loc</span><span class="p">,</span> <span class="n">repo_temp_dest</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">gh_token</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">repo</span>
+
+        <span class="n">old_repo</span> <span class="o">=</span> <span class="n">loading_gui</span><span class="p">(</span>
+            <span class="n">make_backup_clone_old_repo</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;Cloning old repo into a temporary directory </span><span class="si">{repo_temp_dest}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">to_remove_from_old</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selected_files</span><span class="p">]</span>
+
+        <span class="n">loading_gui</span><span class="p">(</span>
+            <span class="n">_remove_history_except_for_files</span><span class="p">,</span>
+            <span class="s1">&#39;Removing history from the temporary old repo. This will take a long time &#39;</span>
+            <span class="s1">&#39;for large repos with many branches. Note that nothing will be pushed to the remote &#39;</span>
+            <span class="s1">&#39;in this step.&#39;</span><span class="p">,</span>
+            <span class="n">old_repo</span><span class="p">,</span>
+            <span class="n">to_remove_from_old</span>
+        <span class="p">)</span>
+
+        <span class="n">should_push</span> <span class="o">=</span> <span class="n">should_push_old_repo_gui</span><span class="p">(</span><span class="n">repo_temp_dest</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">should_push</span><span class="p">:</span>
+            <span class="n">push_all_force</span><span class="p">(</span><span class="n">old_repo</span><span class="p">)</span>
+            <span class="n">dismiss_message_gui</span><span class="p">(</span>
+                <span class="s1">&#39;Old repo pushed to remote. Please check it to make sure everything looks correct&#39;</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Successfully Pushed Old Repo&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">create_new_repo</span><span class="p">:</span>
+            <span class="n">show_created_repo_gui</span><span class="p">(</span><span class="n">github_repo</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">repo_splitter_gui</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Getting started with repo_splitter</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">repo_splitter</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Nick DeRobertis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
