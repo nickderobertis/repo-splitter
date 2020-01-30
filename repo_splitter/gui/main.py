@@ -58,7 +58,6 @@ class SelectRepoConfig:
     store_gh_token: Optional[bool] = True
 
     def __post_init__(self):
-        print(self)
         self._validate()
 
     def _validate(self):
@@ -244,10 +243,6 @@ def select_files_gui(files: List[str], repo: Repo) -> List[str]:
 
         left_listbox.update(left_all_values)
         right_listbox.update(right_all_values)
-        print('values: ', values)
-        print('event: ', event)
-        print('left listbox', left_listbox.__dict__)
-        print('right listbox', right_listbox.__dict__)
 
     right_listbox = window['files_selected']
     final_selected_values = right_listbox.Values
@@ -338,13 +333,6 @@ def repo_splitter_gui(**defaults):
         _clone_and_connect
     )
     from repo_splitter.config import store_github_token
-
-    ### TEMP, for testing
-    defaults.update(dict(
-        repo_loc_url='https://github.com/nickderobertis/dero.git',
-        new_repo_name='testme',
-    ))
-    ### END TEMP
 
     config = repo_select_gui(defaults)
 
