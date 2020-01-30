@@ -20,6 +20,7 @@ def get_desired_files_from_patterns(repo: Repo, file_patterns: Sequence[str],
     :param follow_renames: Whether to track previous names of files from the history and also include those
     :return:
     """
+    # TODO: needs to handle passing patterns which match old files not in the current working directory
     current_dir = os.getcwd()
     os.chdir(repo.working_tree_dir)
     all_files = []

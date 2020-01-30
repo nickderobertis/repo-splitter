@@ -1,17 +1,22 @@
 from copy import deepcopy
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Callable
 from dataclasses import dataclass
 import tempfile
 import os
+import webbrowser
 
-import PySimpleGUI as sg
+
 from git import Repo
+from github.Repository import Repository
 
+from repo_splitter.gui.config import sg
 from repo_splitter.git_tools.clone import clone_repo
+from repo_splitter.git_tools.history import _remove_history_except_for_files
+from repo_splitter.git_tools.push import push_all_force
 from repo_splitter.git_tools.remote import delete_remote
 from repo_splitter.git_tools.files.all import get_all_repo_files
 from repo_splitter.git_tools.files.wanted import get_desired_files_from_patterns
-
+from repo_splitter.gui.loading import loading_gui
 
 FILES_LISTBOX_SETTINGS = dict(
     size=(50, 20),
@@ -44,6 +49,8 @@ class SelectRepoConfig:
     repo_url: Optional[str] = None
     repo_local_path: Optional[str] = None
     all_branches: Optional[bool] = False
+    include_tags: Optional[bool] = False
+    remove_files_from_old_repo: Optional[bool] = True
 
     def __post_init__(self):
         print(self)
@@ -66,7 +73,7 @@ class SelectRepoConfig:
             raise MustProvideOnlyOneRepoException
 
     @property
-    def repo(self) -> str:
+    def repo_loc(self) -> str:
         if self.repo_url:
             return self.repo_url
         if self.repo_local_path:
@@ -93,7 +100,9 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                 [sg.Text('Local repo:'), sg.FolderBrowse(key='repo_loc_file_path')],
                 [sg.Text('New Repo Name:'), sg.InputText(key='new_repo_name', default_text=defaults['new_repo_name'])],
                 [sg.Text('Github Token:'), sg.InputText(key='gh_token', default_text=defaults['gh_token'])],
-                [sg.Checkbox('Split all branches:', key='all_branches')],
+                [sg.Checkbox('Split all branches', key='all_branches')],
+                [sg.Checkbox('Include tags in new repo', key='include_tags')],
+                [sg.Checkbox('Remove history from the old repo', key='remove_files_from_old_repo', default=True)],
                 [sg.Button('Ok'), sg.Button('Cancel')] ]
 
     # Create the Window
@@ -110,7 +119,9 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
                     values['gh_token'],
                     repo_url=values['repo_loc_url'],
                     repo_local_path=values['repo_loc_file_path'],
-                    all_branches=values['all_branches']
+                    all_branches=values['all_branches'],
+                    include_tags=values['include_tags'],
+                    remove_files_from_old_repo=values['remove_files_from_old_repo']
                 )
                 break
             except MustProvideRepoException:
@@ -124,7 +135,7 @@ def repo_select_gui(defaults: Optional[Dict[str, Any]] = None) -> Optional[Selec
     return config
 
 
-def select_files_gui(files: List[str], repo: Repo):
+def select_files_gui(files: List[str], repo: Repo) -> List[str]:
     sg.theme(THEME)
 
     orig_to_select = files
@@ -163,9 +174,13 @@ def select_files_gui(files: List[str], repo: Repo):
     # Create the Window
     window = sg.Window('Repo Splitter - Select Files', layout)
     # Event Loop to process "events" and get the "values" of the inputs
+    exit_on_close = True
     while True:
         event, values = window.read()
         if event in (None, 'Cancel'):   # if user closes window or clicks cancel
+            break
+        if event == 'Ok':
+            exit_on_close = False
             break
         left_selected = deepcopy(values['files_to_select'])
         right_selected = deepcopy(values['files_selected'])
@@ -213,10 +228,90 @@ def select_files_gui(files: List[str], repo: Repo):
         print('left listbox', left_listbox.__dict__)
         print('right listbox', right_listbox.__dict__)
 
+    right_listbox = window['files_selected']
+    final_selected_values = right_listbox.Values
+
+    window.close()
+
+    if exit_on_close:
+        exit(0)
+
+    return final_selected_values
+
+
+def dismiss_message_gui(message: str, title: Optional[str] = 'Notice'):
+    sg.theme(THEME)
+
+    # All the stuff inside your window.
+    layout = [[sg.Text(message)],
+              [sg.Button('Ok')]]
+
+    # Create the Window
+    window = sg.Window(title, layout)
+    # Event Loop to process "events" and get the "values" of the inputs
+    while True:
+        event, values = window.read()
+        if event in (None, 'Ok'):  # if user closes window or clicks cancel
+            break
+
+    window.close()
+
+
+def should_push_old_repo_gui(temp_repo_dest: str) -> bool:
+    sg.theme(THEME)
+
+    message = f"""
+The old repo has the history removed in a temporary repo in {temp_repo_dest}. Please examine 
+the history in detail. If everything looks correct, click "Remove History" to remove the 
+history from the old repo. This will overwrite the existing remote repo. If there is some issue
+or you do not want to push the overwritten history, press "Cancel".
+    """.strip()
+
+    # All the stuff inside your window.
+    layout = [[sg.Text(message)],
+              [sg.Button('Remove History'), sg.Button('Cancel')]]
+
+    # Create the Window
+    window = sg.Window('Successfully Removed History From Old Repo. Push it?', layout)
+    # Event Loop to process "events" and get the "values" of the inputs
+    push_history = False
+    while True:
+        event, values = window.read()
+        if event in (None, 'Cancel'):  # if user closes window or clicks cancel
+            break
+        if event == 'Remove History':
+            push_history = True
+            break
+
+    window.close()
+
+    return push_history
+
+
+def show_created_repo_gui(gh_repo: Repository):
+    sg.theme(THEME)
+
+    # All the stuff inside your window.
+    layout = [[sg.Text(f'The new repo {gh_repo.name} is now available. Click the following link to view:')],
+              [sg.Text(gh_repo.url, click_submits=True, text_color='blue', key='url_clicked')],
+              [sg.Button('Ok')]]
+
+    # Create the Window
+    window = sg.Window('Successfully Created New Repo', layout)
+    # Event Loop to process "events" and get the "values" of the inputs
+    while True:
+        event, values = window.read()
+        if event in (None, 'Ok'):  # if user closes window or clicks cancel
+            break
+        if event == 'url_clicked':
+            webbrowser.open(gh_repo.url)
+
+
     window.close()
 
 
 def repo_splitter_gui():
+    from repo_splitter.__main__ import _create_github_repo_connect_local_repo, _set_backup_dir, _clone_and_connect
 
     ### TEMP, for testing
     defaults = dict(
@@ -234,10 +329,73 @@ def repo_splitter_gui():
     if not config:
         return
     with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
-        repo = clone_repo(config.repo, repo_temp_dest, all_branches=config.all_branches)
-        delete_remote(repo)
+        def clone_and_delete_remote():
+            repo = clone_repo(config.repo_loc, repo_temp_dest, all_branches=config.all_branches)
+            delete_remote(repo)
+            return repo
+
+        repo = loading_gui(
+            clone_and_delete_remote,
+            'Cloning the repo. This may take a long time for larger repos.'
+        )
         files = get_all_repo_files(repo)
-        select_files_gui(files, repo)
+        selected_files = select_files_gui(files, repo)
+
+        loading_gui(
+            _remove_history_except_for_files,
+            'Removing history from the temporary repo. This will take a long time '
+            'for large repos with many branches',
+            repo,
+            selected_files
+        )
+
+        github_repo = loading_gui(
+            _create_github_repo_connect_local_repo,
+            'Creating new Github repo',
+            repo,
+            config.new_repo_name,
+            config.gh_token,
+            all_branches=config.all_branches,
+            include_tags=config.include_tags
+        )
+
+        if not config.remove_files_from_old_repo:
+            show_created_repo_gui(github_repo)
+            exit(0)
+
+        with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
+            def make_backup_clone_old_repo():
+                # TODO: better handling for backup location
+                backup_dir = _set_backup_dir(None, os.getcwd())
+                backup_repo = clone_repo(config.repo_loc, backup_dir, all_branches=True)
+                repo = _clone_and_connect(config.repo_loc, repo_temp_dest, config.gh_token)
+                return repo
+
+            old_repo = loading_gui(
+                make_backup_clone_old_repo,
+                f'Cloning old repo into a temporary directory {repo_temp_dest}',
+            )
+
+            to_remove_from_old = [file for file in files if file not in selected_files]
+
+            loading_gui(
+                _remove_history_except_for_files,
+                'Removing history from the temporary old repo. This will take a long time '
+                'for large repos with many branches. Note that nothing will be pushed to the remote '
+                'in this step.',
+                old_repo,
+                to_remove_from_old
+            )
+
+            should_push = should_push_old_repo_gui(repo_temp_dest)
+
+            if should_push:
+                push_all_force(old_repo)
+                dismiss_message_gui(
+                    'Old repo pushed to remote. Please check it to make sure everything looks correct',
+                    title='Successfully Pushed Old Repo'
+                )
+
 
 if __name__ == "__main__":
     repo_splitter_gui()

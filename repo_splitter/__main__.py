@@ -1,4 +1,4 @@
-import shutil
+import sys
 import os
 import tempfile
 import time
@@ -6,6 +6,7 @@ from typing import Sequence, Optional
 
 import fire
 from git import Repo
+from github.Repository import Repository
 
 from repo_splitter.git_tools.clone import clone_repo
 from repo_splitter.git_tools.remote import delete_remote
@@ -15,6 +16,7 @@ from repo_splitter.github_tools.create import create_repo
 from repo_splitter.github_tools.connect import connect_local_repo_to_github_repo
 from repo_splitter.git_tools.push import push_active_branch, push_all_branches, push_tags, push_all_force
 from repo_splitter.github_tools.query import github_repo_from_clone_url
+from repo_splitter.gui.main import repo_splitter_gui
 
 
 def split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files: Sequence[str],
@@ -82,18 +84,13 @@ def _split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files
         print('Removing unwanted history from temporary repo')
         remove_history_for_files_not_matching(repo, keep_files, follow_renames=follow_renames)
 
-        print(f'Creating Github repo {new_repo_name}')
-        github_repo = create_repo(github_token, new_repo_name)
-
-        print(f'Pushing local temporary repo to github repo {new_repo_name}')
-        connect_local_repo_to_github_repo(repo, github_repo, github_token)
-        if all_branches:
-            push_all_branches(repo)
-        else:
-            push_active_branch(repo)
-
-        if include_tags:
-            push_tags(repo)
+        github_repo = _create_github_repo_connect_local_repo(
+            repo,
+            new_repo_name,
+            github_token,
+            all_branches=all_branches,
+            include_tags=include_tags
+        )
 
         print('Removing temporary directory')
 
@@ -103,6 +100,25 @@ def _split_repo(repo_source: str, repo_dest: str, new_repo_name: str, keep_files
     os.makedirs(full_repo_dest)
     repo = clone_repo(github_repo.clone_url, full_repo_dest, all_branches=all_branches)
     return repo
+
+
+def _create_github_repo_connect_local_repo(repo: Repo, new_repo_name: str,
+                                           github_token: str, all_branches: bool = False, include_tags: bool = False
+                                           ) -> Repository:
+    print(f'Creating Github repo {new_repo_name}')
+    github_repo = create_repo(github_token, new_repo_name)
+
+    print(f'Pushing local temporary repo to github repo {new_repo_name}')
+    connect_local_repo_to_github_repo(repo, github_repo, github_token)
+    if all_branches:
+        push_all_branches(repo)
+    else:
+        push_active_branch(repo)
+
+    if include_tags:
+        push_tags(repo)
+
+    return github_repo
 
 
 def _set_backup_dir(backup_dir: str, repo_dest: str, require_empty: bool = True):
@@ -135,13 +151,7 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
 
     print(f'Cleaning up what was split off in the old repo')
     with tempfile.TemporaryDirectory(dir=os.path.expanduser('~')) as repo_temp_dest:
-        print(f'Cloning {repo_source} into temporary directory {repo_temp_dest}')
-        repo = clone_repo(repo_source, repo_temp_dest, all_branches=True)
-        if is_remote_url(repo_source):
-            # If remote, need to add authentication into the remote
-            github_repo = github_repo_from_clone_url(repo_source, github_token)
-            delete_remote(repo)
-            connect_local_repo_to_github_repo(repo, github_repo, github_token)
+        repo = _clone_and_connect(repo_source, repo_temp_dest, github_token)
 
         print(f'Removing history in the original repo for files which were split off. '
               f'Note: this will take a long time for larger repos')
@@ -166,6 +176,16 @@ def remove_from_repo_history(repo_source: str, drop_files: Sequence[str],
             print('Not pushing modified history to original remote.')
         print('Removing temporary directory')
 
+
+def _clone_and_connect(repo_source: str, repo_temp_dest: str, github_token: str) -> Repo:
+    print(f'Cloning {repo_source} into temporary directory {repo_temp_dest}')
+    repo = clone_repo(repo_source, repo_temp_dest, all_branches=True)
+    if is_remote_url(repo_source):
+        # If remote, need to add authentication into the remote
+        github_repo = github_repo_from_clone_url(repo_source, github_token)
+        delete_remote(repo)
+        connect_local_repo_to_github_repo(repo, github_repo, github_token)
+    return repo
 
 def restore_from_backup(repo_source: str, repo_dest: str, github_token: str, backup_dir: Optional[str] = None):
     """
@@ -195,6 +215,12 @@ def restore_from_backup(repo_source: str, repo_dest: str, github_token: str, bac
 
 
 def main():
+    if len(sys.argv) == 1:
+        # No sub-command passed, launch gui
+        return repo_splitter_gui()
+
+    # Arguments passed, go to CLI interface
+
     return fire.Fire({
         'split': split_repo,
         'rmhist': remove_from_repo_history,
