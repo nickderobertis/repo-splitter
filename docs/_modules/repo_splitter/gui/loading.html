@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.gui.loading &#8212; repo_splitter 0.4.0 documentation</title>
+    <title>repo_splitter.gui.loading &#8212; repo_splitter 0.4.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
@@ -38,6 +38,7 @@
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">TracebackException</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">gc</span>
 
 <span class="c1"># TODO: loading animation only works in tkinter, not qt, update to sg import from config once qt works</span>
 
@@ -104,17 +105,19 @@
     <span class="c1"># --------------------- EVENT LOOP ---------------------</span>
     <span class="n">started_process</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
+    <span class="n">task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">event</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>       <span class="c1"># wait for up to 100 ms for a GUI event</span>
         <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">:</span>
             <span class="k">break</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">started_process</span><span class="p">:</span>
-            <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
                 <span class="n">target</span><span class="o">=</span><span class="n">run_put_result_in_queue</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">gui_queue</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">),</span>
                 <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
             <span class="n">started_process</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># --------------- Check for incoming messages from threads  ---------------</span>
         <span class="k">try</span><span class="p">:</span>
@@ -132,6 +135,15 @@
 
     <span class="c1"># if user exits the window, then close the window and exit the GUI func</span>
     <span class="n">window</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+    <span class="c1"># This cleanup is needed to avoid the Tcl_AsyncDelete: async handler deleted by the wrong thread issue</span>
+    <span class="c1"># See https://pysimplegui.readthedocs.io/en/latest/#multiple-threads</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="c1"># User must have canceled as no result was ever returned</span>

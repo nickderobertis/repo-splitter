@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>repo_splitter.gui.main &#8212; repo_splitter 0.4.0 documentation</title>
+    <title>repo_splitter.gui.main &#8212; repo_splitter 0.4.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_paramlinks.css" />
@@ -92,7 +92,6 @@
     <span class="n">store_gh_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -278,10 +277,6 @@
 
         <span class="n">left_listbox</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">left_all_values</span><span class="p">)</span>
         <span class="n">right_listbox</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">right_all_values</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;values: &#39;</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;event: &#39;</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;left listbox&#39;</span><span class="p">,</span> <span class="n">left_listbox</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;right listbox&#39;</span><span class="p">,</span> <span class="n">right_listbox</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
 
     <span class="n">right_listbox</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="s1">&#39;files_selected&#39;</span><span class="p">]</span>
     <span class="n">final_selected_values</span> <span class="o">=</span> <span class="n">right_listbox</span><span class="o">.</span><span class="n">Values</span>
@@ -372,13 +367,6 @@
         <span class="n">_clone_and_connect</span>
     <span class="p">)</span>
     <span class="kn">from</span> <span class="nn">repo_splitter.config</span> <span class="kn">import</span> <span class="n">store_github_token</span>
-
-    <span class="c1">### TEMP, for testing</span>
-    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">repo_loc_url</span><span class="o">=</span><span class="s1">&#39;https://github.com/nickderobertis/dero.git&#39;</span><span class="p">,</span>
-        <span class="n">new_repo_name</span><span class="o">=</span><span class="s1">&#39;testme&#39;</span><span class="p">,</span>
-    <span class="p">))</span>
-    <span class="c1">### END TEMP</span>
 
     <span class="n">config</span> <span class="o">=</span> <span class="n">repo_select_gui</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
 

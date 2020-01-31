@@ -36,14 +36,6 @@ repo\_splitter.gui.main module
    :undoc-members:
    :show-inheritance:
 
-repo\_splitter.gui.temp module
-------------------------------
-
-.. automodule:: repo_splitter.gui.temp
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------
