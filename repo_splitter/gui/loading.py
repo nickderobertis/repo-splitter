@@ -4,6 +4,7 @@ import threading
 from dataclasses import dataclass
 from traceback import TracebackException
 from typing import Callable, Optional, Any
+import gc
 
 # TODO: loading animation only works in tkinter, not qt, update to sg import from config once qt works
 
@@ -70,17 +71,19 @@ def loading_gui(func: Callable, message: str, *args, **kwargs):
     # --------------------- EVENT LOOP ---------------------
     started_process = False
     result = Result()
+    task: Optional[threading.Thread] = None
     while True:
         event, values = window.Read(timeout=100)       # wait for up to 100 ms for a GUI event
         if event is None or event == 'Cancel':
             break
         if not started_process:
-            threading.Thread(
+            task = threading.Thread(
                 target=run_put_result_in_queue,
                 args=(func, gui_queue, *args),
                 kwargs=kwargs,
                 daemon=True
-            ).start()
+            )
+            task.start()
             started_process = True
         # --------------- Check for incoming messages from threads  ---------------
         try:
@@ -98,6 +101,15 @@ def loading_gui(func: Callable, message: str, *args, **kwargs):
 
     # if user exits the window, then close the window and exit the GUI func
     window.Close()
+
+    # This cleanup is needed to avoid the Tcl_AsyncDelete: async handler deleted by the wrong thread issue
+    # See https://pysimplegui.readthedocs.io/en/latest/#multiple-threads
+    layout = None
+    window = None
+    gc.collect()
+
+    if task is not None:
+        task.join()
 
     if result.empty:
         # User must have canceled as no result was ever returned
